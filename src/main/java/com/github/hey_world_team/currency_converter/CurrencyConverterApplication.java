@@ -1,13 +1,11 @@
-package com.example.currency_converter;
+package com.github.hey_world_team.currency_converter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class CurrencyConverterApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(CurrencyConverterApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(CurrencyConverterApplication.class, args);
+    }
 }
