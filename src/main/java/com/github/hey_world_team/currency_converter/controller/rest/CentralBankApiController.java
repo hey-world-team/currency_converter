@@ -19,7 +19,7 @@ public class CentralBankApiController {
     }
 
     //TODO for future api with current date
-//    private static final String DATE_API = "date_req";
+ //    private static final String DATE_API = "date_req";
     private static final String LINK = "http://www.cbr.ru/scripts/XML_daily.asp";
 
     @GetMapping(value = "/foreignCurrencies")
@@ -27,8 +27,7 @@ public class CentralBankApiController {
         RestTemplate restTemplate = new RestTemplate();
         String currenciesXml = restTemplate.getForObject(LINK, String.class);
         String answer = fileService.writeToFile(currenciesXml);
+        Object currenciesObj = fileService.parseXmlToObject(currenciesXml);
         return new ResponseEntity<>("File was " + answer.toLowerCase(), HttpStatus.OK);
     }
-
-
 }

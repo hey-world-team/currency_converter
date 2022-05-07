@@ -1,6 +1,9 @@
 package com.github.hey_world_team.currency_converter.service;
 
 import com.github.hey_world_team.currency_converter.config.PropertiesForFileService;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +16,7 @@ import java.io.IOException;
 @Service
 public class FileService {
     private final Logger logger = LoggerFactory.getLogger(FileService.class);
-    private final String FILE_FOREIGN_CURRENCIES = "foreign_currencies.xml";
+    private static final String FILE_FOREIGN_CURRENCIES = "foreign_currencies.xml";
     private final PropertiesForFileService propertiesForFileService;
 
     @Autowired
@@ -34,5 +37,11 @@ public class FileService {
         }
         logger.info("Write {} completed", FILE_FOREIGN_CURRENCIES);
         return FileWriteStatus.WRITTEN.name();
+    }
+
+    public Object parseXmlToObject (String xmlString) {
+        logger.info("Started writing XML to object");
+        Document xmlObject = Jsoup.parse(xmlString, "", Parser.xmlParser());
+        return XmlParseStatus.PARSED.name();
     }
 }
