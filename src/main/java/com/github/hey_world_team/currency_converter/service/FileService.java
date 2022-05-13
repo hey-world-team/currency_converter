@@ -1,6 +1,7 @@
 package com.github.hey_world_team.currency_converter.service;
 
 import com.github.hey_world_team.currency_converter.config.PropertiesForFileService;
+import com.github.hey_world_team.currency_converter.repository.CurrencyDataRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
@@ -18,10 +19,12 @@ public class FileService {
     private final Logger logger = LoggerFactory.getLogger(FileService.class);
     private static final String FILE_FOREIGN_CURRENCIES = "foreign_currencies.xml";
     private final PropertiesForFileService propertiesForFileService;
+    private final CurrencyDataRepository currencyDataRepository;
 
     @Autowired
-    public FileService(PropertiesForFileService propertiesForFileService) {
+    public FileService(PropertiesForFileService propertiesForFileService, CurrencyDataRepository currencyDataRepository) {
         this.propertiesForFileService = propertiesForFileService;
+        this.currencyDataRepository = currencyDataRepository;
     }
 
     public String writeToFile(String file) {
@@ -41,7 +44,8 @@ public class FileService {
 
     public Object parseXmlToObject (String xmlString) {
         logger.info("Started writing XML to object");
-        Document xmlObject = Jsoup.parse(xmlString, "", Parser.xmlParser());
+        //TODO реализовать парсер через jsoup для сохранения данных валют
+        currencyDataRepository.save("тест", 0.123);
         return XmlParseStatus.PARSED.name();
     }
 }
