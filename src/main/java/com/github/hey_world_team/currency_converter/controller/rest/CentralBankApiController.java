@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+
 
 @RestController
 public class CentralBankApiController {
@@ -31,11 +33,10 @@ public class CentralBankApiController {
         return new ResponseEntity<>("File was " + answer.toLowerCase(), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/createObject")
-    public ResponseEntity<String> createObject() {
-        String path = new PropertiesForFileService().getPath();
-        String answer = fileService.parseXmlToObject(path);
-        //return new ResponseEntity<>("File was " + answer.toLowerCase(), HttpStatus.OK);
-        return new ResponseEntity<>(answer.toLowerCase(), HttpStatus.OK);
+    //Для тестирования методов
+    @GetMapping(value = "/test")
+    public ResponseEntity<String> createObject() throws IOException {
+        String answer = fileService.parseXmlToObject();
+        return new ResponseEntity<>("File was " + answer.toLowerCase(), HttpStatus.OK);
     }
 }

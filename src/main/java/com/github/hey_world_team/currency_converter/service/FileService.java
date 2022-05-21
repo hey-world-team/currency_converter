@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import static java.lang.Double.parseDouble;
+
 @Service
 public class FileService {
     private final Logger logger = LoggerFactory.getLogger(FileService.class);
@@ -43,20 +45,16 @@ public class FileService {
         return FileWriteStatus.WRITTEN.name();
     }
 
-    public String parseXmlToObject (String xmlFilePath) {
+    public String parseXmlToObject() throws IOException {
         logger.info("Started writing XML to object");
-        //TODO реализовать парсер через jsoup для сохранения данных валют
-
-        currencyDataRepository.save("тест", 0.123);
-        currencyDataRepository.save("тест1", 0.321);
-        //return XmlParseStatus.PARSED.name();
-        //return currencyDataRepository.getCurrencyValueByName("тест1").toString();
-        //return currencyDataRepository.getAllCurrencies().toString();
-        Document doc = Jsoup.parse(xmlFilePath, "", Parser.xmlParser());
+        File input = new File(propertiesForFileService.getPath() + FILE_FOREIGN_CURRENCIES);
+        Document doc = Jsoup.parse(input, "windows-1251", "", Parser.xmlParser());
 
         for (Element e : doc.select("Valute")) {
-            currencyDataRepository.save(e.tagName("Name").toString(), Double.parseDouble(e.tagName("Value").toString()));
+            String name = e.getElementsByTag("Name").text();
+            Double value = parseDouble(e.getElementsByTag("Value").text().replace(',', '.'));
+            currencyDataRepository.save(name, value);
         }
-        return currencyDataRepository.getAllCurrencies().toString();
+        return XmlParseStatus.PARSED.name() + "\n---\nContent:\n" + currencyDataRepository.getAllCurrencies().toString();
     }
 }
