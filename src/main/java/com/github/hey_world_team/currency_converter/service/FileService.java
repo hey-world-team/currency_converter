@@ -4,6 +4,7 @@ import com.github.hey_world_team.currency_converter.config.PropertiesForFileServ
 import com.github.hey_world_team.currency_converter.repository.CurrencyDataRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +43,20 @@ public class FileService {
         return FileWriteStatus.WRITTEN.name();
     }
 
-    public Object parseXmlToObject (String xmlString) {
+    public String parseXmlToObject (String xmlFilePath) {
         logger.info("Started writing XML to object");
         //TODO реализовать парсер через jsoup для сохранения данных валют
+
         currencyDataRepository.save("тест", 0.123);
-        return XmlParseStatus.PARSED.name();
+        currencyDataRepository.save("тест1", 0.321);
+        //return XmlParseStatus.PARSED.name();
+        //return currencyDataRepository.getCurrencyValueByName("тест1").toString();
+        //return currencyDataRepository.getAllCurrencies().toString();
+        Document doc = Jsoup.parse(xmlFilePath, "", Parser.xmlParser());
+
+        for (Element e : doc.select("Valute")) {
+            currencyDataRepository.save(e.tagName("Name").toString(), Double.parseDouble(e.tagName("Value").toString()));
+        }
+        return currencyDataRepository.getAllCurrencies().toString();
     }
 }

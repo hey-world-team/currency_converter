@@ -1,5 +1,6 @@
 package com.github.hey_world_team.currency_converter.controller.rest;
 
+import com.github.hey_world_team.currency_converter.config.PropertiesForFileService;
 import com.github.hey_world_team.currency_converter.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,8 +31,11 @@ public class CentralBankApiController {
         return new ResponseEntity<>("File was " + answer.toLowerCase(), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/test")
-    public void test() {
-        fileService.parseXmlToObject(null);
+    @GetMapping(value = "/createObject")
+    public ResponseEntity<String> createObject() {
+        String path = new PropertiesForFileService().getPath();
+        String answer = fileService.parseXmlToObject(path);
+        //return new ResponseEntity<>("File was " + answer.toLowerCase(), HttpStatus.OK);
+        return new ResponseEntity<>(answer.toLowerCase(), HttpStatus.OK);
     }
 }
