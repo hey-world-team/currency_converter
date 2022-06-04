@@ -30,7 +30,7 @@ public class CurrencyDataRepository {
         repository.replace(name, value);
     }
 
-    public void updateCurrencyValueByName() {
+    public void updateCurrencyValues() {
 
         repository.replaceAll((name, value) -> getCurrencyValueByName(name));
     }
