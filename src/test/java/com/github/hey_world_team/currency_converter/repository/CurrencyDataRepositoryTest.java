@@ -1,7 +1,5 @@
 package com.github.hey_world_team.currency_converter.repository;
 
-import static org.junit.Assert.*;
-
 public class CurrencyDataRepositoryTest {
 
     @org.junit.Before
