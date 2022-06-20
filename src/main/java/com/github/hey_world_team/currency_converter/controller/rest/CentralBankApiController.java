@@ -38,13 +38,4 @@ public class CentralBankApiController {
         String answer = fileService.writeToFile(currenciesXml);
         return new ResponseEntity<>("File was " + answer.toLowerCase(), HttpStatus.OK);
     }
-
-    //Для тестирования методов
-    @GetMapping(value = "/test")
-    public ResponseEntity<String> createObject() throws IOException {
-//        String answer = fileService.parseXmlToObject();
-//        return new ResponseEntity<>("File was " + answer.toLowerCase(), HttpStatus.OK);
-        log.info("Link: {}", link);
-        return new ResponseEntity<>(link, HttpStatus.OK);
-    }
 }

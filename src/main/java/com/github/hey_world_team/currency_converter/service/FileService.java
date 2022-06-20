@@ -19,8 +19,11 @@ import static java.lang.Double.parseDouble;
 
 @Service
 public class FileService {
+    private static final String VALUTE_TAG_NAME = "Valute";
+
     private final Logger logger = LoggerFactory.getLogger(FileService.class);
-    private static final String FILE_FOREIGN_CURRENCIES = "foreign_currencies.xml";
+    private final String fileForeignCurrencies;
+    private final String charset;
     private final PropertiesForFileService propertiesForFileService;
     private final CurrencyDataRepository currencyDataRepository;
 
@@ -28,29 +31,31 @@ public class FileService {
     public FileService(PropertiesForFileService propertiesForFileService, CurrencyDataRepository currencyDataRepository) {
         this.propertiesForFileService = propertiesForFileService;
         this.currencyDataRepository = currencyDataRepository;
+        this.fileForeignCurrencies = propertiesForFileService.getFileForeignCurrencies();
+        this.charset = propertiesForFileService.getCharset();
     }
 
     public String writeToFile(String file) {
-        logger.info("Started read file {}", FILE_FOREIGN_CURRENCIES);
-        File currencyFile = new File(propertiesForFileService.getPath() + FILE_FOREIGN_CURRENCIES);
+        logger.info("Started read file {}", fileForeignCurrencies);
+        File currencyFile = new File(propertiesForFileService.getPath() + fileForeignCurrencies);
         try (FileOutputStream outputStream = new FileOutputStream(currencyFile, false)) {
             byte[] strToBytes = file.getBytes();
-            logger.info("Started write file {}", FILE_FOREIGN_CURRENCIES);
+            logger.info("Started write file {}", fileForeignCurrencies);
             outputStream.write(strToBytes);
         } catch (IOException ex) {
             logger.error(ex.getMessage());
             return FileWriteStatus.NOT_WRITTEN.name();
         }
-        logger.info("Write {} completed", FILE_FOREIGN_CURRENCIES);
+        logger.info("Write {} completed", fileForeignCurrencies);
         return FileWriteStatus.WRITTEN.name();
     }
 
     public String parseXmlToObject() throws IOException {
         logger.info("Started writing XML to object");
-        File input = new File(propertiesForFileService.getPath() + FILE_FOREIGN_CURRENCIES);
-        Document doc = Jsoup.parse(input, "windows-1251", "", Parser.xmlParser());
+        File input = new File(propertiesForFileService.getPath() + fileForeignCurrencies);
+        Document doc = Jsoup.parse(input, charset, "", Parser.xmlParser());
 
-        for (Element e : doc.select("Valute")) {
+        for (Element e : doc.select(VALUTE_TAG_NAME)) {
             String name = e.getElementsByTag("Name").text();
             Double value = parseDouble(e.getElementsByTag("Value").text().replace(',', '.'));
             currencyDataRepository.save(name, value);

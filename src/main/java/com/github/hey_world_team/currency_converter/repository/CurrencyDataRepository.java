@@ -10,29 +10,23 @@ public class CurrencyDataRepository {
     private Map<String, Double> repository = new HashMap<>();
 
     public void save(String name, Double value) {
-
         repository.put(name, value);
     }
 
     public Double getCurrencyValueByName(String name) {
-
         Double value = repository.get(name);
         return value;
     }
 
     public Map getAllCurrencies() {
-
         return repository;
     }
 
     public void updateCurrencyValueByName(String name, Double value) {
-
         repository.replace(name, value);
     }
 
-    public void updateCurrencyValues() {
-
-        repository.replaceAll((name, value) -> getCurrencyValueByName(name));
+    public void updateCurrencyValues(Map <String, Double> newMap) {
+        repository.putAll(newMap);
     }
-
 }
