@@ -14,11 +14,10 @@ public class CurrencyDataRepository {
     }
 
     public Double getCurrencyValueByName(String name) {
-        Double value = repository.get(name);
-        return value;
+        return repository.get(name);
     }
 
-    public Map getAllCurrencies() {
+    public Map<String, Double> getAllCurrencies() {
         return repository;
     }
 

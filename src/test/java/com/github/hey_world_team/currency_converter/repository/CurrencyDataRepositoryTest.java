@@ -9,29 +9,25 @@ import static org.junit.Assert.*;
 
 public class CurrencyDataRepositoryTest {
 
-    @org.junit.Before
-    public void setUp() throws Exception {
-    }
-
-    @org.junit.Test
-    public void save() {
+    @Test
+    public void saveCurrency() {
         CurrencyDataRepository repository = new CurrencyDataRepository();
-        assertEquals(0,repository.getAllCurrencies().size());
+        assertEquals("There is should be 0 currencies, because we dons save anything",0,repository.getAllCurrencies().size());
         repository.save("Ruble", 1.5);
-        assertEquals(1,repository.getAllCurrencies().size());
-        assertEquals(new Double(1.5),repository.getCurrencyValueByName("Ruble"));
+        assertEquals("There is should be 1, because we save one currency - Ruble",1,repository.getAllCurrencies().size());
+        assertEquals("Price of Ruble 1.5", new Double(1.5),repository.getCurrencyValueByName("Ruble"));
     }
 
-    @org.junit.Test
+    @Test
     public void getCurrencyValueByName() {
         CurrencyDataRepository repository = new CurrencyDataRepository();
-        assertNull(repository.getCurrencyValueByName("Ruble"));
+        assertNull("We dont have currency Ruble",repository.getCurrencyValueByName("Ruble"));
         repository.save("Ruble", 1.5);
         assertNotNull(repository.getCurrencyValueByName("Ruble"));
         assertEquals(new Double(1.5),repository.getCurrencyValueByName("Ruble"));
     }
 
-    @org.junit.Test
+    @Test
     public void getAllCurrencies() {
         CurrencyDataRepository repository = new CurrencyDataRepository();
         assertEquals(new HashMap<>(),repository.getAllCurrencies());
@@ -42,7 +38,7 @@ public class CurrencyDataRepositoryTest {
         assertEquals(3,repository.getAllCurrencies().size());
     }
 
-    @org.junit.Test
+    @Test
     public void updateCurrencyValueByName() {
         CurrencyDataRepository repository = new CurrencyDataRepository();
         repository.save("Ruble", 1.5);
