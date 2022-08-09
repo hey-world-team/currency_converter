@@ -16,7 +16,7 @@ public class PropertiesForFileService {
     @Value("${file_name}")
     private String fileName;
 
-    @Value("${charset")
+    @Value("${charset}")
     private String charset;
 
     public String getPath() {

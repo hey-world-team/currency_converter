@@ -1,6 +1,7 @@
 package com.github.hey_world_team.currency_converter.service;
 
 import com.github.hey_world_team.currency_converter.config.PropertiesForFileService;
+import com.github.hey_world_team.currency_converter.dto.Currency;
 import com.github.hey_world_team.currency_converter.repository.CurrencyDataRepository;
 import com.github.hey_world_team.currency_converter.service.statuses.FileWriteStatus;
 import com.github.hey_world_team.currency_converter.service.statuses.XmlParseStatus;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 
 import static java.lang.Double.parseDouble;
 
@@ -39,10 +41,8 @@ public class FileService {
     }
 
     /**
-     *
      * @param file
      * @return answer to controller
-     *
      */
     public String writeToFile(String file) {
         log.info("Started read file {}", fileForeignCurrencies);
@@ -59,22 +59,28 @@ public class FileService {
     }
 
     /**
-     *
      * @return answer to controller
      * @throws IOException
      */
-    public String parseXmlToObject() throws IOException {
+    public String parseXmlToObject() {
         log.info("Started writing XML to object");
         var input = new File(propertiesForFileService.getPath() + fileForeignCurrencies);
-        Document doc = Jsoup.parse(input, charset, "", Parser.xmlParser());
+        Document doc = null;
+        try {
+            doc = Jsoup.parse(input, charset, "", Parser.xmlParser());
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
 
         for (Element e : doc.select(VALUTE_TAG_NAME)) {
+            String id = e.getElementsByTag("CharCode").text();
             String name = e.getElementsByTag("Name").text();
-            Double value = parseDouble(e.getElementsByTag("Value").text().replace(',', '.'));
-            currencyDataRepository.save(name, value);
+            BigDecimal value = BigDecimal.valueOf(parseDouble(e.getElementsByTag("Value").text().replace(',', '.')));
+            Integer nominal = Integer.valueOf(e.getElementsByTag("Nominal").text());
+            Currency currency = new Currency(id, name, value, nominal);
+            currencyDataRepository.save(currency);
         }
-        return XmlParseStatus.PARSED.name() +
-                "\n---\nContent:\n" +
-                currencyDataRepository.getAllCurrencies().toString();
+        return XmlParseStatus.PARSED.name();
     }
 }
