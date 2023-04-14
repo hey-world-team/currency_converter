@@ -1,6 +1,6 @@
 package com.github.hey_world_team.currency_converter.service;
 
-import com.github.hey_world_team.currency_converter.dto.Currency;
+import com.github.hey_world_team.currency_converter.dto.CurrencyDto;
 import com.github.hey_world_team.currency_converter.repository.CurrencyDataRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,25 +13,25 @@ import java.util.List;
 @Service
 public class CurrencyService {
 
-    private static final Logger log = LoggerFactory.getLogger(CurrencyService.class);
-    CurrencyDataRepository currencyDataRepository;
+  private static final Logger log = LoggerFactory.getLogger(CurrencyService.class);
+  CurrencyDataRepository currencyDataRepository;
 
-    @Autowired
-    public CurrencyService(CurrencyDataRepository currencyDataRepository) {
-        this.currencyDataRepository = currencyDataRepository;
-    }
+  @Autowired
+  public CurrencyService(CurrencyDataRepository currencyDataRepository) {
+    this.currencyDataRepository = currencyDataRepository;
+  }
 
-    public Currency getCurrencyCost(String currencyId) {
-        log.info("getting currency cost by currency id: {}", currencyId);
-        return currencyDataRepository.getCurrencyValueById(currencyId);
-    }
+  public CurrencyDto getCurrencyCost(String currencyId) {
+    log.info("getting currency cost by currency id: {}", currencyId);
+    return currencyDataRepository.getCurrencyValueById(currencyId);
+  }
 
-    public List<String> getAllCurrenciesId() {
-        log.info("getting currency ids");
-        return currencyDataRepository.getAllCurrenciesId();
-    }
+  public List<String> getAllCurrenciesId() {
+    log.info("getting currency ids");
+    return currencyDataRepository.getAllCurrenciesId();
+  }
 
-    public Collection<Currency> getCurrentCourse() {
-        return currencyDataRepository.getAllCurrencies();
-    }
+  public Collection<CurrencyDto> getCurrentCourse() {
+    return currencyDataRepository.getAllCurrencies();
+  }
 }

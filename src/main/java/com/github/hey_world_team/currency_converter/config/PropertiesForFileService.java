@@ -7,31 +7,32 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @PropertySource("classpath:application.properties")
 public class PropertiesForFileService {
-    @Value( "${filepath}" )
-    private String path;
 
-    @Value("${link}")
-    private String link;
+  @Value("${filepath}")
+  private String path;
 
-    @Value("${file_name}")
-    private String fileName;
+  @Value("${link}")
+  private String link;
 
-    @Value("${charset}")
-    private String charset;
+  @Value("${file_name}")
+  private String fileName;
 
-    public String getPath() {
-        return path;
-    }
+  @Value("${charset}")
+  private String charset;
 
-    public String getLink() {
-        return link;
-    }
+  public String getPath() {
+    return path;
+  }
 
-    public String getFileForeignCurrencies() {
-        return fileName;
-    }
+  public String getLink() {
+    return link;
+  }
 
-    public String getCharset() {
-        return charset;
-    }
+  public String getFileForeignCurrencies() {
+    return fileName;
+  }
+
+  public String getCharset() {
+    return charset;
+  }
 }
