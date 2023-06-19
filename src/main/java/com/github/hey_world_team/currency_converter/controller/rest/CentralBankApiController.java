@@ -16,40 +16,39 @@ import java.util.List;
 @RequestMapping("/api/currency")
 public class CentralBankApiController {
 
-  private static final Logger log = LoggerFactory.getLogger(CentralBankApiController.class);
-  private final CurrencyService currencyService;
+    private static final Logger log = LoggerFactory.getLogger(CentralBankApiController.class);
+    private final CurrencyService currencyService;
 
-  //TODO for future api with current date
-  //private static final String DATE_API = "date_req";
+    //TODO for future api with current date
+    //private static final String DATE_API = "date_req";
 
-  @Autowired
-  public CentralBankApiController(CurrencyService currencyService) {
-    this.currencyService = currencyService;
-  }
+    @Autowired
+    public CentralBankApiController(CurrencyService currencyService) {
+        this.currencyService = currencyService;
+    }
 
-  @GetMapping(value = "/getAllIds")
-  public ResponseEntity<List<String>> getAllCurrenciesId(RequestEntity<?> entity) {
-    log.info("access to path {}", entity.getUrl());
-    List<String> ids = currencyService.getAllCurrenciesId();
-    return (ids != null && !ids.isEmpty())
-           ? new ResponseEntity<>(ids, HttpStatus.OK)
-           : new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
+    @GetMapping(value = "/getAllIds")
+    public ResponseEntity<List<String>> getAllCurrenciesId(RequestEntity<?> entity) {
+        log.info("access to path {}", entity.getUrl());
+        List<String> ids = currencyService.getAllCurrenciesId();
+        return (ids != null && !ids.isEmpty())
+                ? new ResponseEntity<>(ids, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
-  @GetMapping(value = "/getCurrencyCost/{currencyId}")
-  public ResponseEntity<CurrencyDto> getCurrencyCostById(
-      @PathVariable(value = "currencyId") String currencyId) {
-    log.info("access to API get currency cost by id: {}", currencyId);
-    CurrencyDto currencyDto = currencyService.getCurrencyCost(currencyId);
-    return (currencyDto != null)
-           ? new ResponseEntity<>(currencyDto, HttpStatus.OK)
-           : new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
+    @GetMapping(value = "/getCurrencyCost/{currencyId}")
+    public ResponseEntity<CurrencyDto> getCurrencyCostById(@PathVariable(value = "currencyId") String currencyId) {
+        log.info("access to API get currency cost by id: {}", currencyId);
+        CurrencyDto currencyDto = currencyService.getCurrencyCost(currencyId);
+        return (currencyDto != null)
+                ? new ResponseEntity<>(currencyDto, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
-  @ExceptionHandler(NullPointerException.class)
-  public ResponseEntity<String> exceptionHandler(Throwable npe) {
-    String npeMessage = npe.getMessage();
-    log.error(npeMessage);
-    return new ResponseEntity<>(npeMessage, HttpStatus.NO_CONTENT);
-  }
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<String> exceptionHandler(Throwable npe) {
+        String npeMessage = npe.getMessage();
+        log.error(npeMessage);
+        return new ResponseEntity<>(npeMessage, HttpStatus.NO_CONTENT);
+    }
 }
