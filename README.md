@@ -4,7 +4,7 @@ Java            17+
 Maven           3.5+  
 
 Description:   
-Just a currency converter calculator  
+Currency converter calculation for [russian central bank API ](http://www.cbr.ru/scripts/XML_daily.asp)
     
 How to run:
 1 - git clone https://github.com/hey-world-team/currencyConverter.git  
