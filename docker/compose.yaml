@@ -1,0 +1,31 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=pass
+
+  vault:
+    image: vault:latest
+    container_name: vault
+    ports:
+      - 8300:8200
+
+  springboot-app:
+    build:
+      context: converter
+      dockerfile: Dockerfile
+    container_name: springboot-app
+    ports:
+      - 8081:8081
+    depends_on:
+      - postgres
+      - vault
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=pass
+      - VAULT_ADDR=http://vault:8200
