@@ -1,6 +1,6 @@
 package com.github.hey_world_team.currency_converter.repository;
 
-import com.github.hey_world_team.currency_converter.entity.Currency;
+import com.github.hey_world_team.currency_converter.model.Currency;
 
 import java.util.List;
 

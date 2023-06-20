@@ -1,7 +1,6 @@
 package com.github.hey_world_team.currency_converter.service;
 
-import com.github.hey_world_team.currency_converter.dto.CurrencyDto;
-import com.github.hey_world_team.currency_converter.entity.Currency;
+import com.github.hey_world_team.currency_converter.model.Currency;
 import com.github.hey_world_team.currency_converter.repository.CurrencyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +24,10 @@ public class CurrencyService {
         this.repository = currencyDataRepository;
     }
 
-    public CurrencyDto getCurrencyCost(String currencyId) {
+    public Currency getCurrencyCost(String currencyId) {
         log.info("getting currency cost by currency id: {}", currencyId);
         Currency currency = repository.getCurrencyById(currencyId);
-        CurrencyDto currencyDto = CurrencyDto.builder()
-                .id(currency.getId())
-                .name(currency.getName())
-                .value(currency.getValue())
-                .nominal(currency.getNominal())
-                .build();
-        return currencyDto;
+        return currency;
     }
 
     public List<String> getAllCurrenciesId() {
@@ -42,10 +35,10 @@ public class CurrencyService {
         return repository.getAllCurrenciesIds();
     }
 
-    public Collection<CurrencyDto> getCurrentCourse() {
+    public Collection<Currency> getAllCurrency() {
         return repository.getAllCurrency()
                 .stream()
-                .map(currency -> CurrencyDto.builder()
+                .map(currency -> Currency.builder()
                         .id(currency.getId())
                         .value(currency.getValue())
                         .name(currency.getName())

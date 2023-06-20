@@ -1,4 +1,4 @@
-package com.github.hey_world_team.currency_converter.dto;
+package com.github.hey_world_team.currency_converter.model;
 
 import java.math.BigDecimal;
 
@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @ToString
 @Slf4j
 @Builder
-public class CurrencyDto {
+public class Currency {
 
     private String id;
     private String name;

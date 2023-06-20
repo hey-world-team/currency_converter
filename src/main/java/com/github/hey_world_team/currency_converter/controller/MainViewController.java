@@ -3,7 +3,7 @@ package com.github.hey_world_team.currency_converter.controller;
 import com.github.hey_world_team.currency_converter.config.PropertiesForFileService;
 import com.github.hey_world_team.currency_converter.service.CurrencyService;
 import com.github.hey_world_team.currency_converter.service.FileService;
-import com.github.hey_world_team.currency_converter.service.statuses.FileWriteStatus;
+import com.github.hey_world_team.currency_converter.service.status.FileWriteStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,7 @@ public class MainViewController {
         ModelAndView modelAndView = new ModelAndView("index");
         String date = LocalDate.now().format(format);
         modelAndView.addObject("date", date);
-        modelAndView.addObject("currentCourse", currencyService.getCurrentCourse());
+        modelAndView.addObject("currentCourse", currencyService.getAllCurrency());
         return modelAndView;
     }
 
