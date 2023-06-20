@@ -1,6 +1,5 @@
 package com.github.hey_world_team.currency_converter.repository;
 
-import com.github.hey_world_team.currency_converter.dto.CurrencyDto;
 import com.github.hey_world_team.currency_converter.entity.Currency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +33,9 @@ public class CurrencyDataRepository implements CurrencyRepository {
 
     @Override
     public Currency getCurrencyById(String id) {
-        if (entityManager.contains(id)) {
+        Currency currency = entityManager.find(Currency.class, id);
+        if (currency != null) {
             log.info("currency with id {} found", id);
-            Currency currency = entityManager.find(Currency.class, id);
             return currency;
         } else {
             log.info("currency with id {} NOT found", id);

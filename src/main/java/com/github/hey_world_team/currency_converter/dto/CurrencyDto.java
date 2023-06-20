@@ -2,7 +2,6 @@ package com.github.hey_world_team.currency_converter.dto;
 
 import java.math.BigDecimal;
 
-import com.github.hey_world_team.currency_converter.entity.Currency;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 

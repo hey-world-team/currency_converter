@@ -37,7 +37,8 @@ public class CentralBankApiController {
     }
 
     @GetMapping(value = "/getCurrencyCost/{currencyId}")
-    public ResponseEntity<CurrencyDto> getCurrencyCostById(@PathVariable(value = "currencyId") String currencyId) {
+    public ResponseEntity<CurrencyDto> getCurrencyCostById(
+            @PathVariable(value = "currencyId") String currencyId) {
         log.info("access to API get currency cost by id: {}", currencyId);
         CurrencyDto currencyDto = currencyService.getCurrencyCost(currencyId);
         return (currencyDto != null)
