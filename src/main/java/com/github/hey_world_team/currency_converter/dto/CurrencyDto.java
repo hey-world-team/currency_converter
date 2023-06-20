@@ -2,11 +2,8 @@ package com.github.hey_world_team.currency_converter.dto;
 
 import java.math.BigDecimal;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import com.github.hey_world_team.currency_converter.entity.Currency;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -18,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @EqualsAndHashCode
 @ToString
 @Slf4j
+@Builder
 public class CurrencyDto {
 
     private String id;

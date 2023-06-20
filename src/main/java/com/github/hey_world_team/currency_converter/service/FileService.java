@@ -2,7 +2,9 @@ package com.github.hey_world_team.currency_converter.service;
 
 import com.github.hey_world_team.currency_converter.config.PropertiesForFileService;
 import com.github.hey_world_team.currency_converter.dto.CurrencyDto;
+import com.github.hey_world_team.currency_converter.entity.Currency;
 import com.github.hey_world_team.currency_converter.repository.CurrencyDataRepository;
+import com.github.hey_world_team.currency_converter.repository.CurrencyRepository;
 import com.github.hey_world_team.currency_converter.service.statuses.FileWriteStatus;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,6 +24,7 @@ import java.math.BigDecimal;
 import static java.lang.Double.parseDouble;
 
 @Service
+@Transactional
 public class FileService {
 
     private static final String VALUTE_TAG_NAME = "Valute";
@@ -29,13 +33,13 @@ public class FileService {
     private final String fileForeignCurrencies;
     private final String charset;
     private final PropertiesForFileService propertiesForFileService;
-    private final CurrencyDataRepository currencyDataRepository;
+    private final CurrencyRepository repository;
 
     @Autowired
     public FileService(PropertiesForFileService propertiesForFileService,
-                       CurrencyDataRepository currencyDataRepository) {
+                       CurrencyRepository currencyDataRepository) {
         this.propertiesForFileService = propertiesForFileService;
-        this.currencyDataRepository = currencyDataRepository;
+        this.repository = currencyDataRepository;
         this.fileForeignCurrencies = propertiesForFileService.getFileForeignCurrencies();
         this.charset = propertiesForFileService.getCharset();
     }
@@ -79,8 +83,9 @@ public class FileService {
                     .text()
                     .replace(',', '.')));
             Integer nominal = Integer.valueOf(e.getElementsByTag("Nominal").text());
-            CurrencyDto currencyDto = new CurrencyDto(id, name, value, nominal);
-            currencyDataRepository.save(currencyDto);
+            Currency currency = new Currency(id, name, value, nominal, "");
+
+            repository.saveCurrency(currency);
         }
     }
 }
