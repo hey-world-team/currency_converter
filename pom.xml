@@ -30,6 +30,16 @@
       <artifactId>spring-boot-starter-web</artifactId>
       <version>${springboot.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+      <version>${springboot.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+
 
 
     <!-- <scope>test</scope> -->

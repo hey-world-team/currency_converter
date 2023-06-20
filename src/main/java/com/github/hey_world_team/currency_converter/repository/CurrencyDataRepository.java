@@ -1,48 +1,63 @@
 package com.github.hey_world_team.currency_converter.repository;
 
 import com.github.hey_world_team.currency_converter.dto.CurrencyDto;
+import com.github.hey_world_team.currency_converter.entity.Currency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
 import java.util.*;
 
 @Repository
-public class CurrencyDataRepository {
+public class CurrencyDataRepository implements CurrencyRepository {
 
     private static final Logger log = LoggerFactory.getLogger(CurrencyDataRepository.class);
-    private final Map<String, CurrencyDto> repository = new HashMap<>();
+    private final EntityManager entityManager;
 
-    public void save(CurrencyDto currencyDto) {
-        log.info("save currency id: {}, name: {}, cost: {}",
-                currencyDto.getId(),
-                currencyDto.getName(),
-                currencyDto.getValue());
-        repository.put(currencyDto.getId(), currencyDto);
+    @Autowired
+    public CurrencyDataRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
-    public CurrencyDto getCurrencyValueById(String currencyId) {
-        if (repository.containsKey(currencyId)) {
-            log.info("currency with id {} found", currencyId);
-            return repository.get(currencyId);
-        } else {
-            log.info("currency with id {} NOT found", currencyId);
-            return null;
+    @Override
+    public String saveCurrency(Currency currency) {
+        log.info("save currency id: {}, name: {}, cost: {}",
+                currency.getId(),
+                currency.getName(),
+                currency.getValue());
+        entityManager.persist(currency);
+        entityManager.flush();
+        return currency.getId();
+    }
 
+    @Override
+    public Currency getCurrencyById(String id) {
+        if (entityManager.contains(id)) {
+            log.info("currency with id {} found", id);
+            Currency currency = entityManager.find(Currency.class, id);
+            return currency;
+        } else {
+            log.info("currency with id {} NOT found", id);
+            return null;
         }
     }
 
-    public Collection<CurrencyDto> getAllCurrencies() {
-        return repository.values();
+    @Override
+    public Currency updateCurrency(Currency currency) {
+        return null;
     }
 
-    public List<String> getAllCurrenciesId() {
-        List<String> ids = new ArrayList<>();
-        repository.values().forEach(x -> ids.add(x.getId()));
-        return ids;
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Currency> getAllCurrency() {
+        return entityManager.createQuery("select c from Currency c ").getResultList();
     }
 
-    public void deleteAllCurrencies() {
-        repository.clear();
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<String> getAllCurrenciesIds() {
+        return entityManager.createQuery("select c.id from Currency c ").getResultList();
     }
 }
