@@ -67,7 +67,7 @@ public class FileService {
    */
   public void parseXmlToObject() {
     log.info("Started writing XML to object");
-    var input = new File(propertiesForFileService.getPath() + fileForeignCurrencies);
+    var input = new File(propertiesForFileService.getPath() + "/" + fileForeignCurrencies);
     Document doc = null;
     try {
       doc = Jsoup.parse(input, charset, "", Parser.xmlParser());
