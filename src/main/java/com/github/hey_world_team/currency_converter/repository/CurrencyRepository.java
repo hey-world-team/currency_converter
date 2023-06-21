@@ -14,4 +14,10 @@ public interface CurrencyRepository {
     List<Currency> getAllCurrency();
 
     List<String> getAllCurrenciesIds();
+
+    boolean isEmpty();
+
+    int saveCurrencies(List<Currency> currencies);
+
+    int updateCurrencies(List<Currency> currencies);
 }

@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . /app
 
 # Build the application with Maven
-RUN mvn clean package -DskipTests
+RUN mvn clean package
 
 # Runtime stage
 FROM openjdk:17-jdk-slim
