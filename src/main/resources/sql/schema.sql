@@ -1,4 +1,6 @@
-DROP TABLE IF EXISTS currency;
+drop table if exists currency cascade;
+drop table if exists value cascade;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE currency
 (
@@ -7,11 +9,10 @@ CREATE TABLE currency
     nominal INT
 );
 
-DROP TABLE IF EXISTS value;
-
 CREATE TABLE value
 (
-    currency_id VARCHAR(3) PRIMARY KEY,
-    value       NUMERIC NOT NULL,
-    date        DATE    NOT NULL
+    uuid        UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    currency_id VARCHAR(3) REFERENCES currency (id),
+    value       NUMERIC,
+    date        DATE
 );

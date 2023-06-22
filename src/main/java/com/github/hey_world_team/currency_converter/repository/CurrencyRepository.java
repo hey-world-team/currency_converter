@@ -2,6 +2,7 @@ package com.github.hey_world_team.currency_converter.repository;
 
 import com.github.hey_world_team.currency_converter.model.Currency;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface CurrencyRepository {
@@ -11,7 +12,7 @@ public interface CurrencyRepository {
 
     Currency updateCurrency(Currency currency);
 
-    List<Currency> getAllCurrency();
+    List<Currency> getAllCurrency(LocalDate date);
 
     List<String> getAllCurrenciesIds();
 
@@ -20,4 +21,6 @@ public interface CurrencyRepository {
     int saveCurrencies(List<Currency> currencies);
 
     int updateCurrencies(List<Currency> currencies);
+
+    List<Currency> getCurrencyByPeriod(LocalDate startDate, LocalDate endDate, String idFirst, String idSecond);
 }

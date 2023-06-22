@@ -5,6 +5,7 @@ import com.github.hey_world_team.currency_converter.repository.mapper.CurrencyMa
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -33,15 +34,15 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
                 "    VALUES (?, ?, ?) " +
                 "    RETURNING id" +
                 ") " +
-                "INSERT INTO value (currency_id, value, date) " +
-                "VALUES ((SELECT id FROM inserted_currency), ?, ?)";
+                "INSERT INTO value (uuid,   currency_id, value, date) " +
+                "VALUES (uuid_generate_v4(), (SELECT id FROM inserted_currency), ?, ?)";
 
         int rowsAffected = jdbcTemplate.update(insertQuery,
                 currency.getId(),
                 currency.getName(),
                 currency.getNominal(),
-                currency.getValue(),
-                LocalDate.now());
+                currency.getValue().getValue(),
+                currency.getValue().getDate());
 
         if (rowsAffected > 0) {
             return currency.getId();
@@ -65,11 +66,12 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
             @Override
             public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                 Currency currency = currencies.get(i);
+
                 preparedStatement.setString(1, currency.getId());
                 preparedStatement.setString(2, currency.getName());
                 preparedStatement.setInt(3, currency.getNominal());
-                preparedStatement.setBigDecimal(4, currency.getValue());
-                preparedStatement.setDate(5, Date.valueOf(LocalDate.now()));
+                preparedStatement.setBigDecimal(4, currency.getValue().getValue());
+                preparedStatement.setDate(5, Date.valueOf(currency.getValue().getDate()));
             }
 
             @Override
@@ -88,27 +90,32 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
 
     @Override
     public Currency getCurrencyById(String id) {
-        String insertQuery = "SELECT c.id, c.name, c.nominal, v.value " +
+        String selectQuery = "SELECT c.id, c.name, c.nominal, v.value, v.date " +
                 "FROM currency c " +
                 "JOIN value v ON c.id = v.currency_id " +
-                "WHERE id = ?";
-        Currency currency = jdbcTemplate.queryForObject(insertQuery, new CurrencyMapper(), id);
-        if (currency != null) {
-            log.info("currency with id {} found", id);
-            return currency;
-        } else {
-            log.info("currency with id {} NOT found", id);
-            return null;
+                "WHERE v.currency_id = ?";
+        try {
+            return jdbcTemplate.queryForObject(selectQuery, new CurrencyMapper(), id);
+        } catch (EmptyResultDataAccessException ex) {
+            log.info("Currency with id {} not found", id);
+          return null;
         }
     }
 
     @Override
     public Currency updateCurrency(Currency currency) {
-        String updateQuery = "update value set value = ?, date = ?  WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(updateQuery,
-                currency.getValue(),
-                LocalDate.now(),
-                currency.getId());
+        String updateQuery = "update value set value = ?, date = ?  WHERE currency_id = ?";
+        int rowsAffected = 0;
+        try {
+
+            rowsAffected = jdbcTemplate.update(updateQuery,
+                    currency.getValue().getValue(),
+                    currency.getValue().getDate(),
+                    currency.getId());
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            throw new RuntimeException(ex);
+        }
 
         if (rowsAffected > 0) {
             return currency;
@@ -125,8 +132,12 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         Currency currency = currencies.get(i);
-                        ps.setBigDecimal(1, currency.getValue());
-                        ps.setDate(2, Date.valueOf(LocalDate.now()));
+                        ps.setBigDecimal(1, currency.getValue().getValue());
+                        if (currency.getValue().getDate() != null) {
+                            ps.setDate(2, Date.valueOf(currency.getValue().getDate()));
+                        } else {
+                            ps.setDate(2, null);
+                        }
                         ps.setString(3, currency.getId());
                     }
 
@@ -144,12 +155,31 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
     }
 
     @Override
-    public List<Currency> getAllCurrency() {
-        String selectQuery = "SELECT c.id, c.name, c.nominal, v.value " +
+    public List<Currency> getCurrencyByPeriod(LocalDate startDate, LocalDate endDate, String idFirst, String idSecond) {
+        String selectQuery =
+                "SELECT c.id, c.name, c.nominal, v.value, v.date " +
                 "FROM currency c " +
-                "JOIN value v ON c.id = v.currency_id";
+                        "JOIN value v ON c.id = v.currency_id " +
+                        "WHERE (id = ? OR id = ?) AND " +
+                        "date >= ? AND " +
+                        "date <= ?";
+        List<Currency> currencies = new ArrayList<>();
+        try {
+            currencies = jdbcTemplate.query(selectQuery, new CurrencyMapper(), idFirst, idSecond, startDate, endDate);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            throw new RuntimeException(ex);
+        }
+        return currencies;
+    }
 
-        return new ArrayList<>(jdbcTemplate.query(selectQuery, new CurrencyMapper()));
+    @Override
+    public List<Currency> getAllCurrency(LocalDate date) {
+        String selectQuery = "SELECT c.id, c.name, c.nominal, v.value, v.date " +
+                "FROM currency c " +
+                "JOIN value v ON c.id = v.currency_id where v.date = ? AND v.currency_id != 'RUB'";
+
+        return new ArrayList<>(jdbcTemplate.query(selectQuery, new CurrencyMapper(), date));
     }
 
     @Override

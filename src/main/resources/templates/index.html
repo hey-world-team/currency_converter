@@ -38,72 +38,73 @@
         </div>
     </nav>
 </div>
+<h6>Current date
+    <span th:text="${date}"></span>
+</h6>
+<button type="button"
+        class="btn btn-secondary"
+        onclick="location.href='/history'">Show my converting history
+</button>
+<button type="button"
+        class="btn btn-primary"
+        data-toggle="tooltip"
+        data-placement="right"
+        title="If you need to use the conversion history"
+        onclick="location.href='/availableCryptosExchange'">Available cryptos exchange
+</button>
 
-<div class="container-fluid">
-    <h6>Current date
-        <span th:text="${date}"></span>
-    </h6>
-    <button type="button"
-            class="btn btn-secondary"
-            onclick="location.href='/history'">Show my converting history
-    </button>
-    <button type="button"
-            class="btn btn-primary"
-            data-toggle="tooltip"
-            data-placement="right"
-            title="If you need to use the conversion history"
-            onclick="location.href='/availableCryptosExchange'">Available cryptos exchange
-    </button>
+<div class="container-fluid pb-3">
+    <div class="bg-body-tertiary border rounded-3">
+        <div class="col-md-6 mr-auto ml-auto my-5">
+            <div class="row justify-content-center">
+                <h2>Currency converter online</h2>
+            </div>
 
+            <form>
+                <div class="form-row justify-content-between">
+                    <div class="form-group col-6">
+                        <select id="checkbox1" class="form-control"
+                                onchange="selectChangedAndConvertOneElement(this.value)">
+                            <option selected>Choose...</option>
+                            <option th:each="currencyDto: ${currentCourse}" th:value="${currencyDto.id}"
+                                    th:text="${currencyDto.name}">
+                            </option>
+                        </select>
+                    </div>
 
-    <div class="col-md-6 mr-auto ml-auto my-5">
-        <div class="row justify-content-center">
-            <h2>Currency converter online</h2>
+                    <div class="form-group col-6">
+                        <select id="checkbox2" class="form-control"
+                                onchange="selectChangedAndConvertTwoElement(this.value)">
+                            <option selected>Choose...</option>
+                            <option th:each="currencyDto: ${currentCourse}" th:value="${currencyDto.id}"
+                                    th:text="${currencyDto.name}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row justify-content-between">
+                    <div class="form-group col-6">
+                        <input type="number"
+                               min="1" step="any"
+                               class="form-control"
+                               id="initialValueCurrency"
+                               placeholder="initial value of currencyDto"
+                               oninput="inputChangedAndConvertOneElement(this.value)">
+                    </div>
+                    <div class="form-group col-6">
+                        <input type="number"
+                               min="1"
+                               step="any"
+                               class="form-control"
+                               id="targetValueCurrency"
+                               placeholder="target value of currencyDto"
+                               oninput="inputChangedAndConvertTwoElement(this.value)">
+                    </div>
+                </div>
+            </form>
         </div>
-
-        <form>
-            <div class="form-row justify-content-between">
-                <div class="form-group col-6">
-                    <select id="checkbox1" class="form-control"
-                            onchange="selectChangedAndConvertOneElement(this.value)">
-                        <option selected>Choose...</option>
-                        <option th:each="currencyDto: ${currentCourse}" th:value="${currencyDto.id}"
-                                th:text="${currencyDto.name}">
-                        </option>
-                    </select>
-                </div>
-
-                <div class="form-group col-6">
-                    <select id="checkbox2" class="form-control"
-                            onchange="selectChangedAndConvertTwoElement(this.value)">
-                        <option selected>Choose...</option>
-                        <option th:each="currencyDto: ${currentCourse}" th:value="${currencyDto.id}"
-                                th:text="${currencyDto.name}">
-                        </option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-row justify-content-between">
-                <div class="form-group col-6">
-                    <input type="number"
-                           min="1" step="any"
-                           class="form-control"
-                           id="initialValueCurrency"
-                           placeholder="initial value of currencyDto"
-                           oninput="inputChangedAndConvertOneElement(this.value)">
-                </div>
-                <div class="form-group col-6">
-                    <input type="number"
-                           min="1"
-                           step="any"
-                           class="form-control"
-                           id="targetValueCurrency"
-                           placeholder="target value of currencyDto"
-                           oninput="inputChangedAndConvertTwoElement(this.value)">
-                </div>
-            </div>
-        </form>
+        <div class="bg-body-tertiary border rounded-3" id="chart_div" style="width: 100%; height: 500px;"></div>
     </div>
 </div>
 
@@ -118,6 +119,33 @@
         integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
         crossorigin="anonymous"></script>
 <script src="js/convertingRestApi.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', {'packages': ['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
 
+    function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['date', 'RUB', 'USD'],
+            ['01/10/23', 10, 700],
+            ['02/10/23', 1, 80],
+            ['03/10/23', 1, 90],
+            ['04/10/23', 5, 350],
+            ['01/10/23', 10, 700],
+            ['02/10/23', 1, 80],
+            ['03/10/23', 1, 90],
+            ['04/10/23', 5, 350]
+        ]);
+
+        var options = {
+            title: 'Company Performance',
+            hAxis: {title: 'Date', titleTextStyle: {color: '#333'}},
+            vAxis: {minValue: 0}
+        };
+
+        var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+    }
+</script>
 </body>
 </html>

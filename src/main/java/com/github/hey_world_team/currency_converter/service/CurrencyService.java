@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,8 +25,7 @@ public class CurrencyService {
 
     public Currency getCurrencyCost(String currencyId) {
         log.info("getting currency cost by currency id: {}", currencyId);
-        Currency currency = repository.getCurrencyById(currencyId);
-        return currency;
+        return repository.getCurrencyById(currencyId);
     }
 
     public List<String> getAllCurrenciesId() {
@@ -33,8 +33,8 @@ public class CurrencyService {
         return repository.getAllCurrenciesIds();
     }
 
-    public Collection<Currency> getAllCurrency() {
-        return repository.getAllCurrency()
+    public Collection<Currency> getAllCurrency(LocalDate date) {
+        return repository.getAllCurrency(date)
                 .stream()
                 .map(currency -> Currency.builder()
                         .id(currency.getId())
@@ -47,5 +47,9 @@ public class CurrencyService {
 
     public boolean dbIsEmpty() {
         return repository.isEmpty();
+    }
+
+    public List<Currency> getCurrencyByPeriod(LocalDate startDate, LocalDate endDate, String idFIrst, String idSecond) {
+        return repository.getCurrencyByPeriod(startDate, endDate, idFIrst, idSecond);
     }
 }

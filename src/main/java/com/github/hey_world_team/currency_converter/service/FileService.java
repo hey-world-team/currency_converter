@@ -2,6 +2,7 @@ package com.github.hey_world_team.currency_converter.service;
 
 import com.github.hey_world_team.currency_converter.config.PropertiesForFileService;
 import com.github.hey_world_team.currency_converter.model.Currency;
+import com.github.hey_world_team.currency_converter.model.Value;
 import com.github.hey_world_team.currency_converter.repository.CurrencyRepository;
 import com.github.hey_world_team.currency_converter.service.status.DataBasePrepare;
 import com.github.hey_world_team.currency_converter.service.status.FileWriteStatus;
@@ -19,6 +20,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,9 +51,17 @@ public class FileService {
         this.currencies = new ArrayList<>();
     }
 
-    public int prepareDataBase(DataBasePrepare status) {
+    public int prepareDataBase(DataBasePrepare status, String path) {
         log.info("start prepare data base");
-        int count = 0;
+        if (path == null) {
+            prepareCollectionByDownloadFile();
+        } else {
+            prepareCollectionFromFile(path);
+        }
+        return preparingDB(status);
+    }
+
+    private void prepareCollectionByDownloadFile() {
         var restTemplate = new RestTemplate();
         String currenciesXml = restTemplate.getForObject(link, String.class);
         log.info("download from {} current course", link);
@@ -59,13 +70,22 @@ public class FileService {
         log.info("current course {}", answer);
         if (answer.equals(FileWriteStatus.WRITTEN.name())) {
             log.info("start parsing data to collection");
-            parseXmlToCollectionObjects();
+            parseXmlToCollectionObjects(null);
             log.info("end parsing data to  collection");
         }
+    }
 
+    private void prepareCollectionFromFile(String path) {
+        log.info("start parsing data to collection");
+        parseXmlToCollectionObjects(path);
+        log.info("end parsing data to  collection");
+    }
+
+    private int preparingDB(DataBasePrepare status) {
+        int count = 0;
         if (status.equals(DataBasePrepare.CREATE)) {
             log.info("data base is empty need to create new records");
-            this.currencies.add(new Currency("RUB", "Российский рубль", new BigDecimal(1), 1));
+            this.currencies.add(new Currency("RUB", "Российский рубль",  1, new Value()));
             count = currencyRepository.saveCurrencies(currencies);
         } else if (status.equals(DataBasePrepare.UPDATE)){
             log.info("data base is not empty need to update values");
@@ -98,25 +118,39 @@ public class FileService {
     /**
      *
      */
-    public void parseXmlToCollectionObjects() {
+    public void parseXmlToCollectionObjects(String path) {
         log.info("Started writing XML to object");
-        var input = new File(propertiesForFileService.getPath() + "/" + fileForeignCurrencies);
         Document doc = null;
-        try {
-            doc = Jsoup.parse(input, charset, "", Parser.xmlParser());
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            throw new RuntimeException(e);
+        if (path == null) {
+            var input = new File(propertiesForFileService.getPath() + "/" + fileForeignCurrencies);
+
+            try {
+                doc = Jsoup.parse(input, charset, "", Parser.xmlParser());
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                throw new RuntimeException(e);
+            }
+        } else {
+            var input = new File(path + "/" + fileForeignCurrencies);
+            try {
+                doc = Jsoup.parse(input, charset, "", Parser.xmlParser());
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                throw new RuntimeException(e);
+            }
         }
 
+        String dateAttribute = doc.select("ValCurs").attr("Date");
+        LocalDate date = LocalDate.parse(dateAttribute, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
         for (Element e : doc.select(CURRENCY_TAG_NAME)) {
             String id = e.getElementsByTag("CharCode").text();
             String name = e.getElementsByTag("Name").text();
-            BigDecimal value = BigDecimal.valueOf(parseDouble(e.getElementsByTag("Value")
+            BigDecimal value = BigDecimal.valueOf(Double.parseDouble(e.getElementsByTag("Value")
                     .text()
                     .replace(',', '.')));
             Integer nominal = Integer.valueOf(e.getElementsByTag("Nominal").text());
-            Currency currency = new Currency(id, name, value, nominal);
+            Value currencyValue = new Value(value, date);
+            Currency currency = new Currency(id, name, nominal, currencyValue);
             this.currencies.add(currency);
         }
     }

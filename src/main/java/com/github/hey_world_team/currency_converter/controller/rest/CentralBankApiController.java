@@ -7,6 +7,7 @@ import com.github.hey_world_team.currency_converter.service.status.DataBasePrepa
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -38,9 +40,7 @@ public class CentralBankApiController {
     @PostConstruct
     public void onStartup() {
         if (currencyService.dbIsEmpty()) {
-            fileService.prepareDataBase(DataBasePrepare.CREATE);
-        } {
-            fileService.prepareDataBase(DataBasePrepare.UPDATE);
+            fileService.prepareDataBase(DataBasePrepare.CREATE, null);
         }
     }
 
@@ -53,10 +53,12 @@ public class CentralBankApiController {
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping(value = "/getAllCurrencies")
-    public ResponseEntity<Collection<Currency>> getAllCurrencies(RequestEntity<?> entity) {
+    @GetMapping(value = "/getAllCurrenciesByDate")
+    public ResponseEntity<Collection<Currency>> getAllCurrenciesByDate(
+            RequestEntity<?> entity,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         log.info("access to path {}", entity.getUrl());
-        Collection<Currency> currencies =  currencyService.getAllCurrency();
+        Collection<Currency> currencies = currencyService.getAllCurrency(date);
         return (currencies != null && !currencies.isEmpty())
                 ? new ResponseEntity<>(currencies, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -72,11 +74,35 @@ public class CentralBankApiController {
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping(value = "/updateCurrencies")
-    public ResponseEntity<String> updateCurrencies(RequestEntity<?> entity) {
+    @GetMapping("/byPeriod")
+    public ResponseEntity<List<Currency>> getCurrencyByPeriod(
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam("currencyIdFirst") String idFirst,
+            @RequestParam("currencyIdSecond") String idSecond) {
+        List<Currency> currencyData = currencyService.getCurrencyByPeriod(startDate, endDate, idFirst, idSecond);
+        return (!currencyData.isEmpty())
+                ? new ResponseEntity<>(currencyData, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
+    @PostMapping(value = "/prepareDataBase")
+    public ResponseEntity<String> updateCurrencies(
+            RequestEntity<?> entity,
+            @RequestParam("status") String status,
+            @RequestParam(value = "path", required = false) String path) {
         log.info("access to path {}", entity.getUrl());
-        int affectedRows = fileService.prepareDataBase(DataBasePrepare.UPDATE);
-        return (affectedRows >  0)
+        int affectedRows = 0;
+        if (status.equals(DataBasePrepare.UPDATE.name())) {
+            affectedRows = fileService.prepareDataBase(DataBasePrepare.UPDATE, path);
+        } else if (status.equals(DataBasePrepare.CREATE.name())) {
+            affectedRows = fileService.prepareDataBase(DataBasePrepare.CREATE, path);
+        } else {
+            throw new RuntimeException("Status is not handled");
+        }
+
+        return (affectedRows > 0)
                 ? new ResponseEntity<>("Count of updated rows: " + affectedRows, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -84,14 +110,19 @@ public class CentralBankApiController {
     @Scheduled(cron = "0 1 1 * * ?")//every day on 01:01 pm
     public void onSchedule() {
         log.info("start schedule");
-        int affectedRows = fileService.prepareDataBase(DataBasePrepare.UPDATE);
+        int affectedRows = fileService.prepareDataBase(DataBasePrepare.UPDATE, null);
         log.info("end schedule, updated rows {}", affectedRows);
     }
 
     @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<String> exceptionHandler(Throwable npe) {
+    public ResponseEntity<String> exceptionHandlerNPE(Throwable npe) {
         String npeMessage = npe.getMessage();
-        log.error(npeMessage);
         return new ResponseEntity<>(npeMessage, HttpStatus.NO_CONTENT);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> exceptionHandlerRuntime(Throwable runtimeErr) {
+        String runTimeMessage = runtimeErr.getMessage();
+        return new ResponseEntity<>(runTimeMessage, HttpStatus.NO_CONTENT);
     }
 }
