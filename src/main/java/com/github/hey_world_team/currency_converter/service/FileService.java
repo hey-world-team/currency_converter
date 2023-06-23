@@ -27,6 +27,10 @@ import java.util.List;
 
 import static java.lang.Double.parseDouble;
 
+/**
+ * FileService is responsible for reading and writing data to a file,
+ * preparing data for saving to a database.
+ */
 @Service
 public class FileService {
 
@@ -51,6 +55,12 @@ public class FileService {
         this.currencies = new ArrayList<>();
     }
 
+    /**
+     * This method prepare database depending on the passed status and file path
+     * @param status  indicates how the database should be prepared
+     * @param path The file path to the XML data
+     * @return The number of records prepared in the DB
+     */
     public int prepareDataBase(DataBasePrepare status, String path) {
         log.info("start prepare data base");
         if (path == null) {
@@ -61,6 +71,9 @@ public class FileService {
         return preparingDB(status);
     }
 
+    /**
+     * This method loads data from an external source and parses the XML file
+     */
     private void prepareCollectionByDownloadFile() {
         var restTemplate = new RestTemplate();
         String currenciesXml = restTemplate.getForObject(link, String.class);
@@ -75,12 +88,21 @@ public class FileService {
         }
     }
 
+    /**
+     * This method parses an XML file from the specified path
+     * @param path
+     */
     private void prepareCollectionFromFile(String path) {
         log.info("start parsing data to collection");
         parseXmlToCollectionObjects(path);
         log.info("end parsing data to  collection");
     }
 
+    /**
+     * This method adds or updates records in the database depending on the status
+     * @param status
+     * @return The number of records prepared in the DB
+     */
     private int preparingDB(DataBasePrepare status) {
         int count = 0;
         if (status.equals(DataBasePrepare.CREATE)) {
@@ -98,8 +120,9 @@ public class FileService {
     }
 
     /**
+     * This method writes the passed file to the specified path.
      * @param file
-     * @return answer to controller
+     * @return result of operation, answer to controller
      */
     public String writeToFile(String file) {
         log.info("Started to read file {}", fileForeignCurrencies);
@@ -116,7 +139,8 @@ public class FileService {
     }
 
     /**
-     *
+     * This method parses the XML file into a collection of Currency objects
+     * @param path
      */
     public void parseXmlToCollectionObjects(String path) {
         log.info("Started writing XML to object");

@@ -12,6 +12,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * CurrencyService handles requests related to currency
+ */
 @Service
 public class CurrencyService {
 
@@ -23,16 +26,28 @@ public class CurrencyService {
         this.repository = currencyDataRepository;
     }
 
+    /**
+     * This method returns Currency object at the specified currency ID
+     * @param currencyId identifier of Currency
+     * @return Currency object with her cost
+     */
     public Currency getCurrencyCost(String currencyId) {
         log.info("getting currency cost by currency id: {}", currencyId);
         return repository.getCurrencyById(currencyId);
     }
 
+    /**
+     * This method returns  a list of IDs for all available currencies
+     */
     public List<String> getAllCurrenciesId() {
         log.info("getting currency ids");
         return repository.getAllCurrenciesIds();
     }
 
+    /**
+     * This method returns a collection of Currency objects for the specified date
+     * @param date
+     */
     public Collection<Currency> getAllCurrency(LocalDate date) {
         return repository.getAllCurrency(date)
                 .stream()
@@ -45,11 +60,23 @@ public class CurrencyService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Thid method checks db is empty or not
+     * @return true id db is empty
+     */
     public boolean dbIsEmpty() {
         return repository.isEmpty();
     }
 
-    public List<Currency> getCurrencyByPeriod(LocalDate startDate, LocalDate endDate, String idFIrst, String idSecond) {
-        return repository.getCurrencyByPeriod(startDate, endDate, idFIrst, idSecond);
+    /**
+     * This method returns a list of Currency at the specified period and by the specified identifiers
+     * @param startDate
+     * @param endDate
+     * @param idFirst
+     * @param idSecond
+     * @return
+     */
+    public List<Currency> getCurrencyByPeriod(LocalDate startDate, LocalDate endDate, String idFirst, String idSecond) {
+        return repository.getCurrencyByPeriod(startDate, endDate, idFirst, idSecond);
     }
 }
