@@ -16,6 +16,9 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * CurrencyRepositoryImpl provides implementation of methods for working with the data store
+ */
 @Repository
 public class CurrencyRepositoryImpl implements CurrencyRepository {
 
@@ -27,6 +30,13 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * This method saves Currency object in the data store
+     * It executes SQL queries to insert the currency and its value into the currency and value tables
+     *
+     * @param currency
+     * @return the id of the saved currency. Otherwise, it throws a RuntimeException
+     */
     @Override
     public String saveCurrency(Currency currency) {
         String insertQuery = "WITH inserted_currency AS (" +
@@ -52,6 +62,12 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
         }
     }
 
+    /**
+     * This method stores the list of Currency objects in the data store
+     *
+     * @param currencies
+     * @return the number of saved records
+     */
     @Override
     public int saveCurrencies(List<Currency> currencies) {
         String insertQuery = "WITH inserted_currency AS (" +
@@ -88,6 +104,13 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
         }
     }
 
+    /**
+     * This method returns a Currency object with the specified ID found in the data store
+     * It executes a SQL query to retrieve currency data by currency ID
+     * If the currency is not found, returns null
+     *
+     * @param id
+     */
     @Override
     public Currency getCurrencyById(String id) {
         String selectQuery = "SELECT c.id, c.name, c.nominal, v.value, v.date " +
@@ -98,10 +121,17 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
             return jdbcTemplate.queryForObject(selectQuery, new CurrencyMapper(), id);
         } catch (EmptyResultDataAccessException ex) {
             log.info("Currency with id {} not found", id);
-          return null;
+            return null;
         }
     }
 
+    /**
+     * This method updates the Currency object in the data store
+     * It executes an SQL query to update the value and date of the currency in the value table by its ID
+     * If the update is successful, returns the updated Currency object. Otherwise, it throws a RuntimeException
+     *
+     * @param currency
+     */
     @Override
     public Currency updateCurrency(Currency currency) {
         String updateQuery = "update value set value = ?, date = ?  WHERE currency_id = ?";
@@ -125,27 +155,33 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
         }
     }
 
+    /**
+     * This method updates the list of Currency objects in the data store
+     *
+     * @param currencies
+     * @return the number of updated records
+     */
     @Override
     public int updateCurrencies(List<Currency> currencies) {
         String updateQuery = "update value set value = ?, date = ?  WHERE currency_id = ?";
         int rowsAffected = jdbcTemplate.batchUpdate(updateQuery, new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        Currency currency = currencies.get(i);
-                        ps.setBigDecimal(1, currency.getValue().getValue());
-                        if (currency.getValue().getDate() != null) {
-                            ps.setDate(2, Date.valueOf(currency.getValue().getDate()));
-                        } else {
-                            ps.setDate(2, null);
-                        }
-                        ps.setString(3, currency.getId());
-                    }
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Currency currency = currencies.get(i);
+                ps.setBigDecimal(1, currency.getValue().getValue());
+                if (currency.getValue().getDate() != null) {
+                    ps.setDate(2, Date.valueOf(currency.getValue().getDate()));
+                } else {
+                    ps.setDate(2, null);
+                }
+                ps.setString(3, currency.getId());
+            }
 
-                    @Override
-                    public int getBatchSize() {
-                        return currencies.size();
-                    }
-                }).length;
+            @Override
+            public int getBatchSize() {
+                return currencies.size();
+            }
+        }).length;
         if (rowsAffected > 0) {
             return rowsAffected;
         } else {
@@ -154,11 +190,19 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
         }
     }
 
+    /**
+     * This method returns a list of currencies in the specified period for the specified currency identifiers
+     *
+     * @param startDate
+     * @param endDate
+     * @param idFirst
+     * @param idSecond
+     */
     @Override
     public List<Currency> getCurrencyByPeriod(LocalDate startDate, LocalDate endDate, String idFirst, String idSecond) {
         String selectQuery =
                 "SELECT c.id, c.name, c.nominal, v.value, v.date " +
-                "FROM currency c " +
+                        "FROM currency c " +
                         "JOIN value v ON c.id = v.currency_id " +
                         "WHERE (id = ? OR id = ?) AND " +
                         "date >= ? AND " +
@@ -173,6 +217,12 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
         return currencies;
     }
 
+    /**
+     * This method returns a list of all currencies for a given date
+     *
+     * @param date
+     * @return list of Currency objects
+     */
     @Override
     public List<Currency> getAllCurrency(LocalDate date) {
         String selectQuery = "SELECT c.id, c.name, c.nominal, v.value, v.date " +
@@ -182,12 +232,20 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
         return new ArrayList<>(jdbcTemplate.query(selectQuery, new CurrencyMapper(), date));
     }
 
+    /**
+     * This method returns a list of identifiers of all currencies
+     */
     @Override
     public List<String> getAllCurrenciesIds() {
         return new ArrayList<>(jdbcTemplate.query("select id from currency",
                 (rs, rowNum) -> rs.getString("id")));
     }
 
+    /**
+     * This method checks repository is empty or not
+     *
+     * @return true or false
+     */
     public boolean isEmpty() {
         String countQuery = "select COUNT(*) from currency";
         Integer count = jdbcTemplate.queryForObject(countQuery, Integer.class);

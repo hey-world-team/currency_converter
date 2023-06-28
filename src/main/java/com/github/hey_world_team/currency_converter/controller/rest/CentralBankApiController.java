@@ -19,6 +19,9 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * CentralBankApiController is controller REST API for interaction with currencies
+ */
 @RestController
 @RequestMapping("/api/currency")
 public class CentralBankApiController {
@@ -36,14 +39,21 @@ public class CentralBankApiController {
         this.fileService = fileService;
         this.currencyService = currencyService;
     }
-
+    /**
+     * This method calls "prepareDataBase" method if  database is empty,
+     * executed after the class is instantiated.
+     */
     @PostConstruct
     public void onStartup() {
         if (currencyService.dbIsEmpty()) {
             fileService.prepareDataBase(DataBasePrepare.CREATE, null);
         }
     }
-
+    /**
+     * This method returns a list of identifiers for all currencies
+     * @param entity
+     * @return
+     */
     @GetMapping(value = "/getAllIds")
     public ResponseEntity<List<String>> getAllCurrenciesId(RequestEntity<?> entity) {
         log.info("access to path {}", entity.getUrl());
@@ -52,7 +62,12 @@ public class CentralBankApiController {
                 ? new ResponseEntity<>(ids, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
+    /**
+     * This method returns a collection of all currencies for the specified date
+     * @param entity
+     * @param date
+     * @return
+     */
     @GetMapping(value = "/getAllCurrenciesByDate")
     public ResponseEntity<Collection<Currency>> getAllCurrenciesByDate(
             RequestEntity<?> entity,
@@ -63,7 +78,11 @@ public class CentralBankApiController {
                 ? new ResponseEntity<>(currencies, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
+    /**
+     * This method returns the cost of a currency by its identifier
+     * @param currencyId
+     * @return
+     */
     @GetMapping(value = "/getCurrencyCost/{currencyId}")
     public ResponseEntity<Currency> getCurrencyCostById(
             @PathVariable(value = "currencyId") String currencyId) {
@@ -73,7 +92,15 @@ public class CentralBankApiController {
                 ? new ResponseEntity<>(currencyDto, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
+    /**
+     * This method returns a list of currencies for the specified period
+     * and with the specified currency identifiers
+     * @param startDate
+     * @param endDate
+     * @param idFirst
+     * @param idSecond
+     * @return
+     */
     @GetMapping("/byPeriod")
     public ResponseEntity<List<Currency>> getCurrencyByPeriod(
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -86,7 +113,13 @@ public class CentralBankApiController {
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-
+    /**
+     * This method updates data about currencies in database
+     * @param entity
+     * @param status
+     * @param path
+     * @return
+     */
     @PostMapping(value = "/prepareDataBase")
     public ResponseEntity<String> updateCurrencies(
             RequestEntity<?> entity,
@@ -106,20 +139,30 @@ public class CentralBankApiController {
                 ? new ResponseEntity<>("Count of updated rows: " + affectedRows, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
+    /**
+     * This method updates database on schedule and writes info about it into log
+     */
     @Scheduled(cron = "0 1 1 * * ?")//every day on 01:01 pm
     public void onSchedule() {
         log.info("start schedule");
         int affectedRows = fileService.prepareDataBase(DataBasePrepare.UPDATE, null);
         log.info("end schedule, updated rows {}", affectedRows);
     }
-
+    /**
+     * Exception handler "NullPointerException"
+     * @param npe
+     * @return  ResponseEntity with error's message "NO_CONTENT"
+     */
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<String> exceptionHandlerNPE(Throwable npe) {
         String npeMessage = npe.getMessage();
         return new ResponseEntity<>(npeMessage, HttpStatus.NO_CONTENT);
     }
-
+    /**
+     * Exception handler "RuntimeException"
+     * @param runtimeErr
+     * @return ResponseEntity with error's message "NO_CONTENT"
+     */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> exceptionHandlerRuntime(Throwable runtimeErr) {
         String runTimeMessage = runtimeErr.getMessage();
