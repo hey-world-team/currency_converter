@@ -283,7 +283,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepository,CurrencyConver
     public List<CurrencyConversionHistory> getCurrencyHistoryByInputCurrency(String inputCurrency) {
         String selectQuery = "SELECT * FROM conversion_history WHERE inputCurrency = ?";
 
-        return jdbcTemplate.query(selectQuery, new CurrencyHistoryMapper(),inputCurrency);
+        return jdbcTemplate.query(selectQuery, new CurrencyHistoryMapper(),inputCurrencyexit);
     }
 
     public List<CurrencyConversionHistory> getAllCurrencyHistoryByDate(LocalDate date) {

@@ -30,11 +30,6 @@ public class CurrencyMapper implements RowMapper<Currency> {
                 rs.getString("id"),
                 rs.getString("name"),
                 rs.getInt("nominal"),
-                new Value(
-                        rs.getBigDecimal("value"),
-                        (rs.getDate("date") != null)
-                                ? rs.getDate("date").toLocalDate()
-                                : null
-                ));
+                new Value(rs.getBigDecimal("value"), (rs.getDate("date") != null)  ? rs.getDate("date").toLocalDate() : null));
     }
 }
