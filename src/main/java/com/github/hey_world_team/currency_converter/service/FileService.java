@@ -110,7 +110,7 @@ public class FileService {
         int count = 0;
         if (status.equals(DataBasePrepare.CREATE)) {
             log.info("data base is empty need to create new records");
-            this.currencies.add(new Currency("RUB", "Российский рубль", 1, new Value()));
+            this.currencies.add(new Currency("RUB", "Российский рубль", 1, new Value(null, LocalDate.now())));
             count = currencyRepository.saveCurrencies(currencies);
         } else if (status.equals(DataBasePrepare.UPDATE)) {
             log.info("data base is not empty need to update values");
@@ -170,7 +170,7 @@ public class FileService {
         }
 
         String dateAttribute = doc.select("ValCurs").attr("Date");
-        LocalDate date = LocalDate.parse(dateAttribute, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        LocalDate date = LocalDate.parse(dateAttribute, DateTimeFormatter.ofPattern("d.MM.yyyy"));
         for (Element e : doc.select(CURRENCY_TAG_NAME)) {
             String id = e.getElementsByTag("CharCode").text();
             String name = e.getElementsByTag("Name").text();
