@@ -1,8 +1,8 @@
-CREATE TABLE IF NOT EXISTS currency_conversion_history (
+CREATE TABLE IF NOT EXISTS conversion_history (
     id SERIAL PRIMARY KEY,
-    conversionDate DATE NOT NULL,
-    inputCurrency VARCHAR(3) NOT NULL,
-    inputAmount DECIMAL(18, 2) NOT NULL,
-    outputCurrency VARCHAR(3) NOT NULL,
-    outputAmount DECIMAL(18, 2) NOT NULL
+    conversion_date DATE NOT NULL,
+    input_currency VARCHAR(3) NOT NULL,
+    input_amount DECIMAL(18, 2) NOT NULL,
+    output_currency VARCHAR(3) NOT NULL,
+    output_amount DECIMAL(18, 2) NOT NULL
 );

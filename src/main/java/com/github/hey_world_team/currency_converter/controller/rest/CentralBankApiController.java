@@ -1,6 +1,8 @@
 package com.github.hey_world_team.currency_converter.controller.rest;
 
 import com.github.hey_world_team.currency_converter.model.Currency;
+import com.github.hey_world_team.currency_converter.model.CurrencyConversionHistory;
+import com.github.hey_world_team.currency_converter.service.CurrencyConversionService;
 import com.github.hey_world_team.currency_converter.service.CurrencyService;
 import com.github.hey_world_team.currency_converter.service.FileService;
 import com.github.hey_world_team.currency_converter.service.status.DataBasePrepare;
@@ -29,16 +31,19 @@ public class CentralBankApiController {
     private static final Logger log = LoggerFactory.getLogger(CentralBankApiController.class);
     private final CurrencyService currencyService;
     private final FileService fileService;
+    private final CurrencyConversionService historyService;
 
     //TODO for future api with current date
     //private static final String DATE_API = "date_req";
 
     @Autowired
     public CentralBankApiController(CurrencyService currencyService,
-                                    FileService fileService) {
+                                    FileService fileService, CurrencyConversionService historyService) {
         this.fileService = fileService;
         this.currencyService = currencyService;
+        this.historyService = historyService;
     }
+
     /**
      * This method calls "prepareDataBase" method if  database is empty,
      * executed after the class is instantiated.
@@ -49,8 +54,19 @@ public class CentralBankApiController {
             fileService.prepareDataBase(DataBasePrepare.CREATE, null);
         }
     }
+
+    @GetMapping(value = "/history")
+    public ResponseEntity<Collection<CurrencyConversionHistory>> getAllHistory() {
+        Collection<CurrencyConversionHistory> history = historyService.getCurrencyHistory();
+        return (history != null && !history.isEmpty())
+                ? new ResponseEntity<>(history, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
     /**
      * This method returns a list of identifiers for all currencies
+     *
      * @param entity
      * @return
      */
@@ -62,8 +78,10 @@ public class CentralBankApiController {
                 ? new ResponseEntity<>(ids, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     /**
-     * This method returns a collection of all currencies for the specified date
+     * This method returns a collection of all currencies for the current date
+     *
      * @param entity
      * @param date
      * @return
@@ -78,8 +96,10 @@ public class CentralBankApiController {
                 ? new ResponseEntity<>(currencies, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     /**
      * This method returns the cost of a currency by its identifier
+     *
      * @param currencyId
      * @return
      */
@@ -92,9 +112,11 @@ public class CentralBankApiController {
                 ? new ResponseEntity<>(currencyDto, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     /**
      * This method returns a list of currencies for the specified period
      * and with the specified currency identifiers
+     *
      * @param startDate
      * @param endDate
      * @param idFirst
@@ -115,6 +137,7 @@ public class CentralBankApiController {
 
     /**
      * This method updates data about currencies in database
+     *
      * @param entity
      * @param status
      * @param path
@@ -139,6 +162,7 @@ public class CentralBankApiController {
                 ? new ResponseEntity<>("Count of updated rows: " + affectedRows, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     /**
      * This method updates database on schedule and writes info about it into log
      */
@@ -148,18 +172,22 @@ public class CentralBankApiController {
         int affectedRows = fileService.prepareDataBase(DataBasePrepare.UPDATE, null);
         log.info("end schedule, updated rows {}", affectedRows);
     }
+
     /**
      * Exception handler "NullPointerException"
+     *
      * @param npe
-     * @return  ResponseEntity with error's message "NO_CONTENT"
+     * @return ResponseEntity with error's message "NO_CONTENT"
      */
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<String> exceptionHandlerNPE(Throwable npe) {
         String npeMessage = npe.getMessage();
         return new ResponseEntity<>(npeMessage, HttpStatus.NO_CONTENT);
     }
+
     /**
      * Exception handler "RuntimeException"
+     *
      * @param runtimeErr
      * @return ResponseEntity with error's message "NO_CONTENT"
      */

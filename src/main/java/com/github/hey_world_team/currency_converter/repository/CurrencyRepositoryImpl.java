@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -26,7 +25,7 @@ import java.util.*;
  * CurrencyRepositoryImpl provides implementation of methods for working with the data store
  */
 @Repository
-public class CurrencyRepositoryImpl implements CurrencyRepository,CurrencyConversionRepository {
+public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConversionRepository {
 
     private static final Logger log = LoggerFactory.getLogger(CurrencyRepositoryImpl.class);
     private final JdbcTemplate jdbcTemplate;
@@ -246,6 +245,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepository,CurrencyConver
         return new ArrayList<>(jdbcTemplate.query("select id from currency",
                 (rs, rowNum) -> rs.getString("id")));
     }
+
     /**
      * This method checks repository is empty or not
      *
@@ -261,7 +261,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepository,CurrencyConver
 
     @Override
     public String saveCurrencyConversion(CurrencyConversionHistory history) {
-        String insertQuery = "INSERT INTO conversion_history (conversionDate, inputCurrency, inputAmount, outputCurrency, outputAmount) " +
+        String insertQuery = "INSERT INTO conversion_history (conversion_date, input_currency, input_amount, output_currency, output_amount) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -278,12 +278,18 @@ public class CurrencyRepositoryImpl implements CurrencyRepository,CurrencyConver
         return keyHolder.getKey().toString();
     }
 
+    @Override
+    public List<CurrencyConversionHistory> getAllCurrencyHistory() {
+        String selectQuery = "SELECT * FROM conversion_history";
+        return jdbcTemplate.query(selectQuery, new CurrencyHistoryMapper());
+    }
+
 
     @Override
     public List<CurrencyConversionHistory> getCurrencyHistoryByInputCurrency(String inputCurrency) {
-        String selectQuery = "SELECT * FROM conversion_history WHERE inputCurrency = ?";
+        String selectQuery = "SELECT * FROM conversion_history WHERE input_currency = ?";
 
-        return jdbcTemplate.query(selectQuery, new CurrencyHistoryMapper(),inputCurrency);
+        return jdbcTemplate.query(selectQuery, new CurrencyHistoryMapper(), inputCurrency);
     }
 
     public List<CurrencyConversionHistory> getAllCurrencyHistoryByDate(LocalDate date) {
@@ -294,16 +300,16 @@ public class CurrencyRepositoryImpl implements CurrencyRepository,CurrencyConver
 
     @Override
     public boolean isEmptyHistory() {
-        String countQuery = "select COUNT(*) from currency_conversion";
+        String countQuery = "select COUNT(*) from conversion_history";
         Integer count = jdbcTemplate.queryForObject(countQuery, Integer.class);
         return count != null && count == 0;
     }
 
     @Override
     public void clearCurrencyConversionHistory() {
-        String selectQuery = "DELETE * FROM conversion_history";
+        String selectQuery = "DELETE FROM conversion_history";
 
-         jdbcTemplate.update(selectQuery);
+        jdbcTemplate.update(selectQuery);
     }
 }
 

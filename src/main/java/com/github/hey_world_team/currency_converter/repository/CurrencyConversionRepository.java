@@ -1,6 +1,6 @@
 package com.github.hey_world_team.currency_converter.repository;
 
-import com.github.hey_world_team.currency_converter.model.Currency;
+
 import com.github.hey_world_team.currency_converter.model.CurrencyConversionHistory;
 
 import java.time.LocalDate;
@@ -14,6 +14,8 @@ public interface CurrencyConversionRepository {
     List<CurrencyConversionHistory> getAllCurrencyHistoryByDate(LocalDate date);
 
     boolean isEmptyHistory();
+
+    List<CurrencyConversionHistory> getAllCurrencyHistory();
 
     void clearCurrencyConversionHistory();
 
