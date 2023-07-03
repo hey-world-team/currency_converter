@@ -261,7 +261,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
 
     @Override
     public String saveCurrencyConversion(CurrencyConversionHistory history) {
-        String insertQuery = "INSERT INTO conversion_history (conversion_date, input_currency, input_amount, output_currency, output_amount) " +
+        String insertQuery = "INSERT INTO history (conversion_date, input_currency, input_amount, output_currency, output_amount) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -280,34 +280,34 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
 
     @Override
     public List<CurrencyConversionHistory> getAllCurrencyHistory() {
-        String selectQuery = "SELECT * FROM conversion_history";
+        String selectQuery = "SELECT * FROM history";
         return jdbcTemplate.query(selectQuery, new CurrencyHistoryMapper());
     }
 
 
     @Override
     public List<CurrencyConversionHistory> getCurrencyHistoryByInputCurrency(String inputCurrency) {
-        String selectQuery = "SELECT * FROM conversion_history WHERE input_currency = ?";
+        String selectQuery = "SELECT * FROM history WHERE input_currency = ?";
 
         return jdbcTemplate.query(selectQuery, new CurrencyHistoryMapper(), inputCurrency);
     }
 
     public List<CurrencyConversionHistory> getAllCurrencyHistoryByDate(LocalDate date) {
-        String selectQuery = "SELECT * FROM conversion_history WHERE conversion_date = ?";
+        String selectQuery = "SELECT * FROM history WHERE conversion_date = ?";
 
         return jdbcTemplate.query(selectQuery, new CurrencyHistoryMapper(), date);
     }
 
     @Override
     public boolean isEmptyHistory() {
-        String countQuery = "select COUNT(*) from conversion_history";
+        String countQuery = "select COUNT(*) from history";
         Integer count = jdbcTemplate.queryForObject(countQuery, Integer.class);
         return count != null && count == 0;
     }
 
     @Override
     public void clearCurrencyConversionHistory() {
-        String selectQuery = "DELETE FROM conversion_history";
+        String selectQuery = "DELETE FROM history";
 
         jdbcTemplate.update(selectQuery);
     }
