@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS conversion_history (
+CREATE TABLE IF NOT EXISTS history (
     id SERIAL PRIMARY KEY,
     conversion_date DATE NOT NULL,
     input_currency VARCHAR(3) NOT NULL,

@@ -16,11 +16,11 @@ public class CurrencyHistoryMapper implements RowMapper<CurrencyConversionHistor
         public CurrencyConversionHistory mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new CurrencyConversionHistory(
             rs.getLong("id"),
-            rs.getDate("conversionDate"),
-            rs.getString("inputCurrency"),
-            rs.getBigDecimal("inputAmount"),
-            rs.getString("outputCurrency"),
-            rs.getBigDecimal("outputAmount"));
+            rs.getDate("conversion_date"),
+            rs.getString("input_currency"),
+            rs.getBigDecimal("input_amount"),
+            rs.getString("output_currency"),
+            rs.getBigDecimal("output_amount"));
         }
     }
 
