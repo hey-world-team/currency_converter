@@ -1,10 +1,10 @@
 package com.github.hey_world_team.currency_converter.controller.rest;
 
 import com.github.hey_world_team.currency_converter.model.Currency;
-import com.github.hey_world_team.currency_converter.model.CurrencyConversionHistory;
-import com.github.hey_world_team.currency_converter.service.CurrencyConversionService;
+import com.github.hey_world_team.currency_converter.model.History;
 import com.github.hey_world_team.currency_converter.service.CurrencyService;
 import com.github.hey_world_team.currency_converter.service.FileService;
+import com.github.hey_world_team.currency_converter.service.HistoryService;
 import com.github.hey_world_team.currency_converter.service.status.DataBasePrepare;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * CentralBankApiController is controller REST API for interaction with currencies
+ * CentralBankApiController is controller REST API for interaction with currencies and history of conversion
  */
 @RestController
 @RequestMapping("/api/currency")
@@ -31,14 +31,14 @@ public class CentralBankApiController {
     private static final Logger log = LoggerFactory.getLogger(CentralBankApiController.class);
     private final CurrencyService currencyService;
     private final FileService fileService;
-    private final CurrencyConversionService historyService;
+    private final HistoryService historyService;
 
     //TODO for future api with current date
     //private static final String DATE_API = "date_req";
 
     @Autowired
     public CentralBankApiController(CurrencyService currencyService,
-                                    FileService fileService, CurrencyConversionService historyService) {
+                                    FileService fileService, HistoryService historyService) {
         this.fileService = fileService;
         this.currencyService = currencyService;
         this.historyService = historyService;
@@ -46,7 +46,7 @@ public class CentralBankApiController {
 
     /**
      * This method calls "prepareDataBase" method if  database is empty,
-     * executed after the class is instantiated.
+     * executed after the class is instantiated
      */
     @PostConstruct
     public void onStartup() {
@@ -55,9 +55,14 @@ public class CentralBankApiController {
         }
     }
 
+    /**
+     * This method returns the history of currency conversion
+     *
+     * @return ResponseEntity with the collection of currency conversion history
+     */
     @GetMapping(value = "/history")
-    public ResponseEntity<Collection<CurrencyConversionHistory>> getAllHistory() {
-        Collection<CurrencyConversionHistory> history = historyService.getCurrencyHistory();
+    public ResponseEntity<Collection<History>> getAllHistory() {
+        Collection<History> history = historyService.getCurrencyHistory();
         return (history != null && !history.isEmpty())
                 ? new ResponseEntity<>(history, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -67,8 +72,8 @@ public class CentralBankApiController {
     /**
      * This method returns a list of identifiers for all currencies
      *
-     * @param entity
-     * @return
+     * @param entity RequestEntity object representing the HTTP request
+     * @return ResponseEntity with the list of currency identifiers
      */
     @GetMapping(value = "/getAllIds")
     public ResponseEntity<List<String>> getAllCurrenciesId(RequestEntity<?> entity) {
@@ -80,11 +85,11 @@ public class CentralBankApiController {
     }
 
     /**
-     * This method returns a collection of all currencies for the current date
+     * This method returns a collection of all currencies for the specified  date
      *
-     * @param entity
-     * @param date
-     * @return
+     * @param entity RequestEntity object representing the HTTP request
+     * @param date   the date for which to retrieve the currencies
+     * @return ResponseEntity with the collection of currencies for the specified  date
      */
     @GetMapping(value = "/getAllCurrenciesByDate")
     public ResponseEntity<Collection<Currency>> getAllCurrenciesByDate(
@@ -100,8 +105,8 @@ public class CentralBankApiController {
     /**
      * This method returns the cost of a currency by its identifier
      *
-     * @param currencyId
-     * @return
+     * @param currencyId the identifier of the currency
+     * @return ResponseEntity with the currency information
      */
     @GetMapping(value = "/getCurrencyCost/{currencyId}")
     public ResponseEntity<Currency> getCurrencyCostById(
@@ -117,11 +122,11 @@ public class CentralBankApiController {
      * This method returns a list of currencies for the specified period
      * and with the specified currency identifiers
      *
-     * @param startDate
-     * @param endDate
-     * @param idFirst
-     * @param idSecond
-     * @return
+     * @param startDate the start date of the period
+     * @param endDate   the end date of the period
+     * @param idFirst   the identifier of the first currency
+     * @param idSecond  the identifier of the second currency
+     * @return ResponseEntity with the list of currencies.
      */
     @GetMapping("/byPeriod")
     public ResponseEntity<List<Currency>> getCurrencyByPeriod(
@@ -136,12 +141,12 @@ public class CentralBankApiController {
     }
 
     /**
-     * This method updates data about currencies in database
+     * This method updates  currencies data in the database
      *
-     * @param entity
-     * @param status
-     * @param path
-     * @return
+     * @param entity RequestEntity object representing the HTTP request
+     * @param status the status of the database update
+     * @param path   the path to the file containing the updated data (optional)
+     * @return ResponseEntity with information about the updating
      */
     @PostMapping(value = "/prepareDataBase")
     public ResponseEntity<String> updateCurrencies(
@@ -164,9 +169,12 @@ public class CentralBankApiController {
     }
 
     /**
-     * This method updates database on schedule and writes info about it into log
+     * This method updates the database on a schedule and writes information about it into the log,
+     * is scheduled to run automatically every day at 01:01 AM,
+     * it starts the database update process and logs the number of affected rows.
+     * The database update is performed using the fileService's prepareDataBase method
      */
-    @Scheduled(cron = "0 1 1 * * ?")//every day on 01:01 pm
+    @Scheduled(cron = "0 1 1 * * ?")//every day at 01:01 AM
     public void onSchedule() {
         log.info("start schedule");
         int affectedRows = fileService.prepareDataBase(DataBasePrepare.UPDATE, null);
@@ -174,9 +182,9 @@ public class CentralBankApiController {
     }
 
     /**
-     * Exception handler "NullPointerException"
+     * Exception handler for "NullPointerException"
      *
-     * @param npe
+     * @param npe the thrown NullPointerException
      * @return ResponseEntity with error's message "NO_CONTENT"
      */
     @ExceptionHandler(NullPointerException.class)
@@ -186,9 +194,9 @@ public class CentralBankApiController {
     }
 
     /**
-     * Exception handler "RuntimeException"
+     * Exception handler for "RuntimeException"
      *
-     * @param runtimeErr
+     * @param runtimeErr the thrown RuntimeException
      * @return ResponseEntity with error's message "NO_CONTENT"
      */
     @ExceptionHandler(RuntimeException.class)

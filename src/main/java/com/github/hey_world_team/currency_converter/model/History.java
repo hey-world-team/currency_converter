@@ -6,13 +6,15 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.Date;
 
-
+/**
+ *  This class represents a currency conversion history record
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class CurrencyConversionHistory {
+public class History {
 
     private long id;
     private Date conversionDate;

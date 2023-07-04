@@ -25,11 +25,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.Double.parseDouble;
 
 /**
  * FileService is responsible for reading and writing data to a file,
- * preparing data for saving to a database.
+ * preparing data for saving to a database
  */
 @Service
 public class FileService {
@@ -58,9 +57,9 @@ public class FileService {
     /**
      * This method prepare database depending on the passed status and file path
      *
-     * @param status indicates how the database should be prepared
-     * @param path   The file path to the XML data
-     * @return The number of records prepared in the DB
+     * @param status the status indicates how the database should be prepared
+     * @param path   the file path to the XML data
+     * @return the number of records prepared in the DB
      */
     public int prepareDataBase(DataBasePrepare status, String path) {
         log.info("start prepare data base");
@@ -92,7 +91,7 @@ public class FileService {
     /**
      * This method parses an XML file from the specified path
      *
-     * @param path
+     * @param path the file path to the XML data
      */
     private void prepareCollectionFromFile(String path) {
         log.info("start parsing data to collection");
@@ -103,8 +102,8 @@ public class FileService {
     /**
      * This method adds or updates records in the database depending on the status
      *
-     * @param status
-     * @return The number of records prepared in the DB
+     * @param status the status indicating the operation to be performed
+     * @return the number of records prepared in the DB
      */
     private int preparingDB(DataBasePrepare status) {
         int count = 0;
@@ -125,8 +124,8 @@ public class FileService {
     /**
      * This method writes the passed file to the specified path.
      *
-     * @param file
-     * @return result of operation, answer to controller
+     * @param file the file to be written
+     * @return the result of operation, an answer to the controller
      */
     public String writeToFile(String file) {
         log.info("Started to read file {}", fileForeignCurrencies);
@@ -145,7 +144,7 @@ public class FileService {
     /**
      * This method parses the XML file into a collection of Currency objects
      *
-     * @param path
+     * @param path the file path to the XML data
      */
     public void parseXmlToCollectionObjects(String path) {
         log.info("Started writing XML to object");

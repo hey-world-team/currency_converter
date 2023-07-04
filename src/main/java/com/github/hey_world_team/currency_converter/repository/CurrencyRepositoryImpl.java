@@ -1,9 +1,9 @@
 package com.github.hey_world_team.currency_converter.repository;
 
 import com.github.hey_world_team.currency_converter.model.Currency;
-import com.github.hey_world_team.currency_converter.model.CurrencyConversionHistory;
+import com.github.hey_world_team.currency_converter.model.History;
 import com.github.hey_world_team.currency_converter.repository.mapper.CurrencyMapper;
-import com.github.hey_world_team.currency_converter.repository.mapper.CurrencyHistoryMapper;
+import com.github.hey_world_team.currency_converter.repository.mapper.HistoryMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +22,12 @@ import java.time.LocalDate;
 import java.util.*;
 
 /**
- * CurrencyRepositoryImpl provides implementation of methods for working with the data store
+ * CurrencyRepositoryImpl provides implementation of methods for working with the database,
+ * functionality for working with currency data and conversion history,
+ * and also provides interaction with the database through JdbcTemplate
  */
 @Repository
-public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConversionRepository {
+public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryRepository {
 
     private static final Logger log = LoggerFactory.getLogger(CurrencyRepositoryImpl.class);
     private final JdbcTemplate jdbcTemplate;
@@ -36,10 +38,10 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
     }
 
     /**
-     * This method saves Currency object in the data store
+     * This method saves Currency object in the data store.
      * It executes SQL queries to insert the currency and its value into the currency and value tables
      *
-     * @param currency
+     * @param currency the Currency object to be saved
      * @return the id of the saved currency. Otherwise, it throws a RuntimeException
      */
     @Override
@@ -70,7 +72,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
     /**
      * This method stores the list of Currency objects in the data store
      *
-     * @param currencies
+     * @param currencies the list of Currency objects to be saved
      * @return the number of saved records
      */
     @Override
@@ -112,9 +114,9 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
     /**
      * This method returns a Currency object with the specified ID found in the data store
      * It executes a SQL query to retrieve currency data by currency ID
-     * If the currency is not found, returns null
      *
-     * @param id
+     * @param id the ID of the currency to retrieve
+     * @return the Currency object with the specified ID, or null if not found
      */
     @Override
     public Currency getCurrencyById(String id) {
@@ -133,9 +135,9 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
     /**
      * This method updates the Currency object in the data store
      * It executes an SQL query to update the value and date of the currency in the value table by its ID
-     * If the update is successful, returns the updated Currency object. Otherwise, it throws a RuntimeException
      *
-     * @param currency
+     * @param currency the Currency object to update
+     * @return the updated Currency object, or throws a RuntimeException if the operation fails
      */
     @Override
     public Currency updateCurrency(Currency currency) {
@@ -163,8 +165,8 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
     /**
      * This method updates the list of Currency objects in the data store
      *
-     * @param currencies
-     * @return the number of updated records
+     * @param currencies the list of Currency objects to update
+     * @return the number of updated records, or throws a RuntimeException if the operation fails
      */
     @Override
     public int updateCurrencies(List<Currency> currencies) {
@@ -198,10 +200,11 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
     /**
      * This method returns a list of currencies in the specified period for the specified currency identifiers
      *
-     * @param startDate
-     * @param endDate
-     * @param idFirst
-     * @param idSecond
+     * @param startDate the start date of the period
+     * @param endDate   the end date of the period
+     * @param idFirst   the ID of the first currency
+     * @param idSecond  the ID of the second currency
+     * @return a list of Currency objects within the specified period for the specified currency identifiers
      */
     @Override
     public List<Currency> getCurrencyByPeriod(LocalDate startDate, LocalDate endDate, String idFirst, String idSecond) {
@@ -225,8 +228,8 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
     /**
      * This method returns a list of all currencies for a given date
      *
-     * @param date
-     * @return list of Currency objects
+     * @param date the date for which to retrieve currencies
+     * @return list of Currency objects for the given date
      */
     @Override
     public List<Currency> getAllCurrency(LocalDate date) {
@@ -238,7 +241,9 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
     }
 
     /**
-     * This method returns a list of identifiers of all currencies
+     * This method retrieves  a list of identifiers of all currencies
+     *
+     * @return a list of identifiers of all currencies
      */
     @Override
     public List<String> getAllCurrenciesIds() {
@@ -249,7 +254,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
     /**
      * This method checks repository is empty or not
      *
-     * @return true or false
+     * @return true if the repository is empty, false otherwise
      */
     @Override
     public boolean isEmpty() {
@@ -259,8 +264,14 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
 
     }
 
+    /**
+     * This method saves the currency conversion history to the database
+     *
+     * @param history the currency conversion history to be saved
+     * @return a string representation of the generated key (ID) of the saved history entry
+     */
     @Override
-    public String saveCurrencyConversion(CurrencyConversionHistory history) {
+    public String saveHistory(History history) {
         String insertQuery = "INSERT INTO history (conversion_date, input_currency, input_amount, output_currency, output_amount) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
@@ -278,26 +289,48 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
         return keyHolder.getKey().toString();
     }
 
+    /**
+     * This method retrieves a list of all currency conversion history entries
+     *
+     * @return a list of all currency conversion history entries
+     */
     @Override
-    public List<CurrencyConversionHistory> getAllCurrencyHistory() {
+    public List<History> getAllCurrencyHistory() {
         String selectQuery = "SELECT * FROM history";
-        return jdbcTemplate.query(selectQuery, new CurrencyHistoryMapper());
+        return jdbcTemplate.query(selectQuery, new HistoryMapper());
     }
 
-
+    /**
+     * This method retrieves a list of currency conversion history entries based on the input currency
+     *
+     * @param inputCurrency the input currency from DB
+     * @return a list of currency conversion history entries based on the input currency
+     */
     @Override
-    public List<CurrencyConversionHistory> getCurrencyHistoryByInputCurrency(String inputCurrency) {
+    public List<History> getCurrencyHistoryByInputCurrency(String inputCurrency) {
         String selectQuery = "SELECT * FROM history WHERE input_currency = ?";
 
-        return jdbcTemplate.query(selectQuery, new CurrencyHistoryMapper(), inputCurrency);
+        return jdbcTemplate.query(selectQuery, new HistoryMapper(), inputCurrency);
     }
 
-    public List<CurrencyConversionHistory> getAllCurrencyHistoryByDate(LocalDate date) {
+    /**
+     * This method retrieves a list of currency conversion history entries for a given date
+     *
+     * @param date the date for which to retrieve currency conversion history entries
+     * @return a list of currency conversion history entries for the given date
+     */
+    @Override
+    public List<History> getAllCurrencyHistoryByDate(LocalDate date) {
         String selectQuery = "SELECT * FROM history WHERE conversion_date = ?";
 
-        return jdbcTemplate.query(selectQuery, new CurrencyHistoryMapper(), date);
+        return jdbcTemplate.query(selectQuery, new HistoryMapper(), date);
     }
 
+    /**
+     * This method checks if the currency conversion history is empty
+     *
+     * @return true if the currency conversion history is empty, false otherwise
+     */
     @Override
     public boolean isEmptyHistory() {
         String countQuery = "select COUNT(*) from history";
@@ -305,8 +338,11 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, CurrencyConve
         return count != null && count == 0;
     }
 
+    /**
+     * This method clears  the currency conversion history from the database
+     */
     @Override
-    public void clearCurrencyConversionHistory() {
+    public void clearHistory() {
         String selectQuery = "DELETE FROM history";
 
         jdbcTemplate.update(selectQuery);

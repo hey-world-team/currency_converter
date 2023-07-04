@@ -16,13 +16,13 @@ import java.sql.SQLException;
 public class CurrencyMapper implements RowMapper<Currency> {
 
     /**
-     * This method creates and returns a new Currency object,
+     * This method creates a new Currency object,
      * using the values from the current row of the ResultSet
      *
-     * @param rs     set of results from DB
-     * @param rowNum the number of current string from set of results
-     * @return
-     * @throws SQLException
+     * @param rs     the ResultSet to be mapped from DB
+     * @param rowNum the number of the current row
+     * @return a Currency object mapped from the current row of the ResultSet
+     * @throws SQLException if a SQLException is encountered while processing the ResultSet
      */
     @Override
     public Currency mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -30,6 +30,12 @@ public class CurrencyMapper implements RowMapper<Currency> {
                 rs.getString("id"),
                 rs.getString("name"),
                 rs.getInt("nominal"),
-                new Value(rs.getBigDecimal("value"), (rs.getDate("date") != null)  ? rs.getDate("date").toLocalDate() : null));
+                new Value(
+                        rs.getBigDecimal("value"),
+                        (rs.getDate("date") != null)
+                                ? rs.getDate("date").toLocalDate()
+                                : null
+                )
+        );
     }
 }

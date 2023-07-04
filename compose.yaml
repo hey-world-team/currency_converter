@@ -4,20 +4,11 @@ services:
     image: postgres:latest
     container_name: postgres
     ports:
-      - 5433:5432
+      - 5432:5432
     environment:
       - POSTGRES_PASSWORD=pass
     volumes:
       - ./src/main/resources/sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-#  history:
-#    image: postgres:latest
-#    container_name: history
-#    ports:
-#      - 5434:5433
-#    environment:
-#      - POSTGRES_PASSWORD=pass
-#    volumes:
-#      - ./src/main/resources/sql/schema2.sql:/docker-entrypoint-initdb.d/schema2.sql
 
   vault:
     image: vault:latest
@@ -34,12 +25,8 @@ services:
     depends_on:
       - postgres
       - vault
-#      - history
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5433/postgres
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=pass
-#      - SPRING_DATASOURCE2_URL=jdbc:postgresql://history:5434/history
-#      - SPRING_DATASOURCE2_USERNAME=postgres
-#      - SPRING_DATASOURCE2_PASSWORD=pass
       - VAULT_ADDR=http://vault:8200
