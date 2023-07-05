@@ -31,7 +31,7 @@ public class HistoryService {
      * @param history the currency conversion history object to be added
      * @return the added History object
      */
-    public String saveHistory(History history) {
+    public int saveHistory(History history) {
         log.info("Adding conversion history: {}", history);
         return historyRepository.saveHistory(history);
     }

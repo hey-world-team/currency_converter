@@ -1,6 +1,7 @@
 package com.github.hey_world_team.currency_converter.repository;
 
 import com.github.hey_world_team.currency_converter.model.Currency;
+import com.github.hey_world_team.currency_converter.model.History;
 import com.github.hey_world_team.currency_converter.model.Value;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,9 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,12 +55,14 @@ public class CurrencyRepositoryImplTest {
     public void setup() {
         currencyRepository = new CurrencyRepositoryImpl(jdbcTemplate);
         String dropTableQuery = "DROP TABLE IF EXISTS value CASCADE;\n" +
-                "DROP TABLE IF EXISTS currency CASCADE;";
+                "DROP TABLE IF EXISTS currency CASCADE;\n" +
+                "DROP TABLE IF EXISTS history CASCADE;";
         jdbcTemplate.execute(dropTableQuery);
 
         String createTableQuery = "CREATE TABLE currency (id VARCHAR(3) PRIMARY KEY, name VARCHAR(250) NOT NULL, nominal INT);\n" +
                 "CREATE TABLE value (uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), currency_id VARCHAR(3), value NUMERIC NOT NULL, date DATE NOT NULL, FOREIGN KEY (currency_id) REFERENCES currency(id));\n" +
-                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";";
+                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";\n" +
+                "CREATE TABLE IF NOT EXISTS history (id SERIAL PRIMARY KEY, conversion_date DATE NOT NULL, input_currency VARCHAR(3) NOT NULL, input_amount DECIMAL(18, 2) NOT NULL, output_currency VARCHAR(3) NOT NULL, output_amount DECIMAL(18, 2) NOT NULL);";
         jdbcTemplate.execute(createTableQuery);
     }
 
@@ -213,7 +218,7 @@ public class CurrencyRepositoryImplTest {
         currency1.setId("USD");
         currency1.setName("US Dollar");
         currency1.setNominal(1);
-        currency1.setValue(new Value(BigDecimal.valueOf(1.0),date));
+        currency1.setValue(new Value(BigDecimal.valueOf(1.0), date));
 
         Currency currency2 = new Currency();
         currency2.setId("EUR");
@@ -348,7 +353,7 @@ public class CurrencyRepositoryImplTest {
         String idSecond = "EUR";
 
         // Act
-int affectedRows = currencyRepository.saveCurrencies(List.of(currency1, currency2));
+        int affectedRows = currencyRepository.saveCurrencies(List.of(currency1, currency2));
         List<Currency> values = currencyRepository.getCurrencyByPeriod(startDate, endDate, idFirst, idSecond);
 
         // Assert
@@ -372,4 +377,102 @@ int affectedRows = currencyRepository.saveCurrencies(List.of(currency1, currency
         assertNotNull(values);
         assertTrue(values.isEmpty());
     }
+
+
+    @Test
+    public void saveHistory_ShouldSaveCurrencyConversionHistory() {
+        // Arrange
+        LocalDate date = LocalDate.now();
+
+        // Create a sample history record
+        History history = new History();
+        history.setId(1);
+        history.setConversionDate(Date.valueOf(date));
+        history.setInputCurrency("USD");
+        history.setInputAmount(new BigDecimal("100"));
+        history.setOutputCurrency("EUR");
+        history.setOutputAmount(new BigDecimal("85"));
+
+        // Act
+        int id = currencyRepository.saveHistory(history);
+
+        // Assert
+        assertNotNull(id);
+
+    }
+
+    @Test
+    public void getAllCurrencyHistory_ShouldReturnListOfAllCurrencyHistoryEntries() {
+        // Arrange
+        LocalDate date = LocalDate.now();
+
+        // Create a sample history record
+        History history = new History();
+        history.setId(1);
+        history.setConversionDate(Date.valueOf(date));
+        history.setInputCurrency("USD");
+        history.setInputAmount(new BigDecimal("90"));
+        history.setOutputCurrency("AED");
+        history.setOutputAmount(new BigDecimal("85"));
+
+        // Save the sample history record
+        currencyRepository.saveHistory(history);
+
+        // Act
+        List<History> historyList = currencyRepository.getAllCurrencyHistory();
+
+        // Assert
+        assertNotNull(historyList);
+        assertFalse(historyList.isEmpty());
+        assertEquals(1, historyList.size());
+
+    }
+
+    @Test
+    void getCurrencyHistoryByInputCurrency_ShouldReturnListOfCurrencyHistoryEntriesBasedOnInputCurrency() {
+        // Arrange
+        LocalDate date = LocalDate.now();
+        String inputCurrency = "USD";
+        // Create a history record1
+        History history = new History();
+        history.setId(1);
+        history.setConversionDate(Date.valueOf(date));
+        history.setInputCurrency("USD");
+        history.setInputAmount(new BigDecimal("60"));
+        history.setOutputCurrency("EUR");
+        history.setOutputAmount(new BigDecimal("65"));
+        List<History> expectedHistoryList = new ArrayList<>();
+
+        // Create a history record2
+        History history1 = new History();
+        history1.setId(2);
+        history1.setConversionDate(Date.valueOf(date));
+        history1.setInputCurrency("EUR");
+        history1.setInputAmount(new BigDecimal("70"));
+        history1.setOutputCurrency("USD");
+        history1.setOutputAmount(new BigDecimal("75"));
+
+        // Create a history record2
+        History history2 = new History();
+        history2.setId(3);
+        history2.setConversionDate(Date.valueOf(date));
+        history2.setInputCurrency("USD");
+        history2.setInputAmount(new BigDecimal("80"));
+        history2.setOutputCurrency("AED");
+        history2.setOutputAmount(new BigDecimal("85"));
+
+        // Act
+        currencyRepository.saveHistory(history);
+        currencyRepository.saveHistory(history1);
+        currencyRepository.saveHistory(history2);
+
+        List<History> historyFromDB = currencyRepository.getCurrencyHistoryByInputCurrency(inputCurrency);
+
+        // Assert
+        assertFalse(historyFromDB.isEmpty());
+        assertEquals(2, historyFromDB.size());
+        assertEquals(historyFromDB.get(0).getInputCurrency(), inputCurrency);
+        assertEquals(historyFromDB.get(1).getInputCurrency(), inputCurrency);
+    }
 }
+

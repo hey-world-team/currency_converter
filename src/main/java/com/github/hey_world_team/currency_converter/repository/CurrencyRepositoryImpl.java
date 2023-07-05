@@ -10,14 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -271,22 +268,24 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
      * @return a string representation of the generated key (ID) of the saved history entry
      */
     @Override
-    public String saveHistory(History history) {
-        String insertQuery = "INSERT INTO history (conversion_date, input_currency, input_amount, output_currency, output_amount) " +
-                "VALUES (?, ?, ?, ?, ?)";
+    public int saveHistory(History history) {
+        String insertQuery = "INSERT INTO history (id, conversion_date, input_currency, input_amount, output_currency, output_amount) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
-            ps.setDate(1, new java.sql.Date(history.getConversionDate().getTime()));
-            ps.setString(2, history.getInputCurrency());
-            ps.setBigDecimal(3, history.getInputAmount());
-            ps.setString(4, history.getOutputCurrency());
-            ps.setBigDecimal(5, history.getOutputAmount());
-            return ps;
-        }, keyHolder);
+        int rowsAffected = jdbcTemplate.update(insertQuery,
+                history.getId(),
+                history.getConversionDate(),
+                history.getInputCurrency(),
+                history.getInputAmount(),
+                history.getOutputCurrency(),
+                history.getOutputAmount());
 
-        return keyHolder.getKey().toString();
+        if (rowsAffected > 0) {
+            return history.getId();
+        } else {
+            log.error("Failed to save history with id: {}", history.getId());
+            throw new RuntimeException("Failed to save history with id: " + history.getId());
+        }
     }
 
     /**

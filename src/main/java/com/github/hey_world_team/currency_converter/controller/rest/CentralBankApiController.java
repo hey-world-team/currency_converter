@@ -62,6 +62,7 @@ public class CentralBankApiController {
      */
     @GetMapping(value = "/history")
     public ResponseEntity<Collection<History>> getAllHistory() {
+        log.info("access to API get conversion history");
         Collection<History> history = historyService.getCurrencyHistory();
         return (history != null && !history.isEmpty())
                 ? new ResponseEntity<>(history, HttpStatus.OK)

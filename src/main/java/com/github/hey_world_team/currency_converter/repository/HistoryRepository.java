@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface HistoryRepository {
 
-    String saveHistory(History history);
+    int saveHistory(History history);
 
     List<History> getCurrencyHistoryByInputCurrency(String inputCurrency);
 

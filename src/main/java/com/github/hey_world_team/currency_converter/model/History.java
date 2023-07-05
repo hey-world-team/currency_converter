@@ -16,7 +16,7 @@ import java.util.Date;
 @ToString
 public class History {
 
-    private long id;
+    private int id;
     private Date conversionDate;
     private String inputCurrency;
     private BigDecimal inputAmount;

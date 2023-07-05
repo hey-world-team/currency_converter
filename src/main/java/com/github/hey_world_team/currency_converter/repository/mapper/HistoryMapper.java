@@ -27,7 +27,7 @@ public class HistoryMapper implements RowMapper<History> {
     @Override
     public History mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new History(
-                rs.getLong("id"),
+                rs.getInt("id"),
                 rs.getDate("conversion_date"),
                 rs.getString("input_currency"),
                 rs.getBigDecimal("input_amount"),
