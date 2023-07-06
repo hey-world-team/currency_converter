@@ -4,7 +4,7 @@ import lombok.*;
 
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  *  This class represents a currency conversion history record
@@ -17,7 +17,7 @@ import java.util.Date;
 public class History {
 
     private int id;
-    private Date conversionDate;
+    private LocalDate conversionDate;
     private String inputCurrency;
     private BigDecimal inputAmount;
     private String outputCurrency;

@@ -28,7 +28,7 @@ public class HistoryMapper implements RowMapper<History> {
     public History mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new History(
                 rs.getInt("id"),
-                rs.getDate("conversion_date"),
+                rs.getDate("conversion_date").toLocalDate(),
                 rs.getString("input_currency"),
                 rs.getBigDecimal("input_amount"),
                 rs.getString("output_currency"),

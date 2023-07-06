@@ -15,7 +15,6 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -230,7 +229,6 @@ public class CurrencyRepositoryImplTest {
         int affectedRows = currencyRepository.saveCurrencies(List.of(currency1, currency2));
         List<Currency> currencies = currencyRepository.getAllCurrency(date);
 
-
         // Assert
         assertEquals(2, affectedRows);
         assertNotNull(currencies);
@@ -378,65 +376,89 @@ public class CurrencyRepositoryImplTest {
         assertTrue(values.isEmpty());
     }
 
-
     @Test
-    public void saveHistory_ShouldSaveCurrencyConversionHistory() {
+    public void saveHistory_ShouldReturnId_WhenSavedSuccessfully() {
         // Arrange
-        LocalDate date = LocalDate.now();
-
-        // Create a sample history record
         History history = new History();
         history.setId(1);
-        history.setConversionDate(Date.valueOf(date));
+        history.setConversionDate(LocalDate.now());
         history.setInputCurrency("USD");
         history.setInputAmount(new BigDecimal("100"));
         history.setOutputCurrency("EUR");
         history.setOutputAmount(new BigDecimal("85"));
 
         // Act
-        int id = currencyRepository.saveHistory(history);
+        int rowsAffected = currencyRepository.saveHistory(history);
 
         // Assert
-        assertNotNull(id);
-
+        assertNotNull(rowsAffected);
+        assertEquals(1, rowsAffected);
     }
 
     @Test
-    public void getAllCurrencyHistory_ShouldReturnListOfAllCurrencyHistoryEntries() {
+    public void saveHistory_ShouldThrowException_WhenSaveFails() {
         // Arrange
-        LocalDate date = LocalDate.now();
 
-        // Create a sample history record
         History history = new History();
         history.setId(1);
-        history.setConversionDate(Date.valueOf(date));
+        history.setConversionDate(LocalDate.now());
+        history.setInputCurrency("USD");
+        history.setInputAmount(new BigDecimal("100"));
+        history.setOutputCurrency("EUR");
+        history.setOutputAmount(new BigDecimal("85"));
+
+        // Create a mock JdbcTemplate that always returns 0 rows affected
+        JdbcTemplate mockJdbcTemplate = mock(JdbcTemplate.class);
+        when(mockJdbcTemplate.update(anyString(), any(Object[].class))).thenReturn(0);
+
+        CurrencyRepositoryImpl currencyRepository = new CurrencyRepositoryImpl(mockJdbcTemplate);
+        // Act and Assert
+        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(
+                RuntimeException.class,
+                () -> currencyRepository.saveHistory(history)
+        );
+        assertEquals("Failed to save history with id: " + history.getId(), exception.getMessage());
+    }
+
+    @Test
+    public void getAllCurrencyHistory_ShouldReturnListOfHistory_WhenDataExists() {
+        // Arrange
+        History history = new History();
+        history.setId(1);
+        history.setConversionDate(LocalDate.now());
         history.setInputCurrency("USD");
         history.setInputAmount(new BigDecimal("90"));
         history.setOutputCurrency("AED");
         history.setOutputAmount(new BigDecimal("85"));
 
-        // Save the sample history record
-        currencyRepository.saveHistory(history);
-
         // Act
+        currencyRepository.saveHistory(history);
         List<History> historyList = currencyRepository.getAllCurrencyHistory();
 
         // Assert
         assertNotNull(historyList);
         assertFalse(historyList.isEmpty());
         assertEquals(1, historyList.size());
-
     }
 
     @Test
-    void getCurrencyHistoryByInputCurrency_ShouldReturnListOfCurrencyHistoryEntriesBasedOnInputCurrency() {
+    public void getAllCurrencyHistory_ShouldReturnEmptyList_WhenDataDoesNotExists() {
+        // Act
+        List<History> historyList = currencyRepository.getAllCurrencyHistory();
+
+        // Assert
+        assertNotNull(historyList);
+        assertTrue(historyList.isEmpty());
+    }
+
+    @Test
+    public void getCurrencyHistoryByInputCurrency_ShouldReturnListOfHistory_WhenInputCurrencyExists() {
         // Arrange
-        LocalDate date = LocalDate.now();
         String inputCurrency = "USD";
         // Create a history record1
         History history = new History();
         history.setId(1);
-        history.setConversionDate(Date.valueOf(date));
+        history.setConversionDate(LocalDate.now());
         history.setInputCurrency("USD");
         history.setInputAmount(new BigDecimal("60"));
         history.setOutputCurrency("EUR");
@@ -446,16 +468,16 @@ public class CurrencyRepositoryImplTest {
         // Create a history record2
         History history1 = new History();
         history1.setId(2);
-        history1.setConversionDate(Date.valueOf(date));
+        history1.setConversionDate(LocalDate.now());
         history1.setInputCurrency("EUR");
         history1.setInputAmount(new BigDecimal("70"));
         history1.setOutputCurrency("USD");
         history1.setOutputAmount(new BigDecimal("75"));
 
-        // Create a history record2
+        // Create a history record3
         History history2 = new History();
         history2.setId(3);
-        history2.setConversionDate(Date.valueOf(date));
+        history2.setConversionDate(LocalDate.now());
         history2.setInputCurrency("USD");
         history2.setInputAmount(new BigDecimal("80"));
         history2.setOutputCurrency("AED");
@@ -465,7 +487,6 @@ public class CurrencyRepositoryImplTest {
         currencyRepository.saveHistory(history);
         currencyRepository.saveHistory(history1);
         currencyRepository.saveHistory(history2);
-
         List<History> historyFromDB = currencyRepository.getCurrencyHistoryByInputCurrency(inputCurrency);
 
         // Assert
@@ -473,6 +494,146 @@ public class CurrencyRepositoryImplTest {
         assertEquals(2, historyFromDB.size());
         assertEquals(historyFromDB.get(0).getInputCurrency(), inputCurrency);
         assertEquals(historyFromDB.get(1).getInputCurrency(), inputCurrency);
+    }
+
+    @Test
+    public void getCurrencyHistoryByInputCurrency_ShouldReturnEmptyList_WhenInputCurrencyDoesNotExists() {
+        // Arrange
+        String inputCurrency = "USD";
+        // Create a history record1
+        History history = new History();
+        history.setId(1);
+        history.setConversionDate(LocalDate.now());
+        history.setInputCurrency("AED");
+        history.setInputAmount(new BigDecimal("60"));
+        history.setOutputCurrency("EUR");
+        history.setOutputAmount(new BigDecimal("65"));
+        List<History> expectedHistoryList = new ArrayList<>();
+
+        // Create a history record2
+        History history1 = new History();
+        history1.setId(2);
+        history1.setConversionDate(LocalDate.now());
+        history1.setInputCurrency("EUR");
+        history1.setInputAmount(new BigDecimal("70"));
+        history1.setOutputCurrency("USD");
+        history1.setOutputAmount(new BigDecimal("75"));
+
+        //Act
+        currencyRepository.saveHistory(history);
+        currencyRepository.saveHistory(history1);
+        List<History> historyList = currencyRepository.getCurrencyHistoryByInputCurrency(inputCurrency);
+
+        //Assert
+        assertNotNull(historyList);
+        assertTrue(historyList.isEmpty());
+    }
+
+    @Test
+    public void getAllCurrencyHistoryByDate_ShouldReturnListOfHistoryForGivenDate_IfDateExists() {
+        // Arrange
+        LocalDate expectedDate = LocalDate.of(2022, 1, 1);
+
+        // Create a history record1
+        History history = new History();
+        history.setId(1);
+        history.setConversionDate(LocalDate.now());
+        history.setInputCurrency("USD");
+        history.setInputAmount(new BigDecimal("60"));
+        history.setOutputCurrency("EUR");
+        history.setOutputAmount(new BigDecimal("65"));
+
+        // Create a history record2
+        History history1 = new History();
+        history1.setId(2);
+        history1.setConversionDate(LocalDate.of(2022, 1, 1));
+        history1.setInputCurrency("EUR");
+        history1.setInputAmount(new BigDecimal("70"));
+        history1.setOutputCurrency("USD");
+        history1.setOutputAmount(new BigDecimal("75"));
+
+        // Create a history record3
+        History history2 = new History();
+        history2.setId(3);
+        history2.setConversionDate(LocalDate.of(2022, 1, 1));
+        history2.setInputCurrency("USD");
+        history2.setInputAmount(new BigDecimal("80"));
+        history2.setOutputCurrency("AED");
+        history2.setOutputAmount(new BigDecimal("85"));
+
+        // Act
+        currencyRepository.saveHistory(history);
+        currencyRepository.saveHistory(history1);
+        currencyRepository.saveHistory(history2);
+        List<History> historyList = currencyRepository.getAllCurrencyHistoryByDate(expectedDate);
+
+        // Assert
+        assertFalse(historyList.isEmpty());
+        assertEquals(2, historyList.size());
+        assertEquals(historyList.get(0).getConversionDate(), expectedDate);
+        assertEquals(historyList.get(1).getConversionDate(), expectedDate);
+    }
+
+    @Test
+    public void getAllCurrencyHistoryByDate_ShouldReturnEmptyList_IfDateDoesNotExists() {
+        // Arrange
+        LocalDate date = LocalDate.of(2022, 1, 1); // An arbitrary date that does not exist in the database
+
+        // Create a history record1
+        History history = new History();
+        history.setId(1);
+        history.setConversionDate(LocalDate.now());
+        history.setInputCurrency("USD");
+        history.setInputAmount(new BigDecimal("60"));
+        history.setOutputCurrency("EUR");
+        history.setOutputAmount(new BigDecimal("65"));
+
+        // Create a history record2
+        History history1 = new History();
+        history1.setId(2);
+        history1.setConversionDate(LocalDate.now());
+        history1.setInputCurrency("EUR");
+        history1.setInputAmount(new BigDecimal("70"));
+        history1.setOutputCurrency("USD");
+        history1.setOutputAmount(new BigDecimal("75"));
+
+        // Act
+        currencyRepository.saveHistory(history);
+        currencyRepository.saveHistory(history1);
+        List<History> historyList = currencyRepository.getAllCurrencyHistoryByDate(date);
+
+        // Assert
+        assertNotNull(historyList);
+        assertTrue(historyList.isEmpty());
+    }
+
+    @Test
+    public void isEmptyHistory_ShouldReturnTrue_WhenHistoryTableIsEmpty() {
+        // Act
+        boolean isEmpty = currencyRepository.isEmptyHistory();
+
+        // Assert
+        assertTrue(isEmpty);
+    }
+
+    @Test
+    public void clearHistory_ShouldDeleteAllEntriesFromHistory() {
+        //Arrange
+        History history = new History();
+        history.setId(1);
+        history.setConversionDate(LocalDate.now());
+        history.setInputCurrency("USD");
+        history.setInputAmount(new BigDecimal("60"));
+        history.setOutputCurrency("EUR");
+        history.setOutputAmount(new BigDecimal("65"));
+
+        // Act
+        int rowsAffected = currencyRepository.saveHistory(history);
+        currencyRepository.clearHistory();
+
+        // Assert
+        assertNotNull(rowsAffected);
+        assertTrue(currencyRepository.isEmptyHistory());
     }
 }
 
