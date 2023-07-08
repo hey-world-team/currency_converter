@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -64,13 +65,25 @@ public class CentralBankApiController {
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping(value = "/getCurrencyCost/{currencyId}")
-    public ResponseEntity<Currency> getCurrencyCostById(
+    @GetMapping(value = "/getCurrencyByID/{currencyId}")
+    public ResponseEntity<Currency> getCurrencyByID(
             @PathVariable(value = "currencyId") String currencyId) {
         log.info("access to API get currency cost by id: {}", currencyId);
-        Currency currencyDto = currencyService.getCurrencyCost(currencyId);
+        Currency currencyDto = currencyService.getCurrencyByID(currencyId);
         return (currencyDto != null)
                 ? new ResponseEntity<>(currencyDto, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping(value = "/getCurrencyCost")
+    public ResponseEntity<BigDecimal> getCurrencyCost(
+            @RequestParam(value = "inputID") String inputID,
+            @RequestParam("outputID") String outputID,
+            @RequestParam("count") int count) {
+        log.info("access to API get currency cost for: {} with count {} in {}", inputID, outputID, count);
+        BigDecimal cost = currencyService.getCurrencyCost(inputID, outputID, count);
+        return (cost != null)
+                ? new ResponseEntity<>(cost, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -85,7 +98,6 @@ public class CentralBankApiController {
                 ? new ResponseEntity<>(currencyData, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
 
     @PostMapping(value = "/prepareDataBase")
     public ResponseEntity<String> updateCurrencies(

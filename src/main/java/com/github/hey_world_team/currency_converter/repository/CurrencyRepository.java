@@ -10,6 +10,8 @@ public interface CurrencyRepository {
 
     Currency getCurrencyById(String id);
 
+    List<Currency> getCurrenciesByIds(List<String> ids);
+
     Currency updateCurrency(Currency currency);
 
     List<Currency> getAllCurrency(LocalDate date);

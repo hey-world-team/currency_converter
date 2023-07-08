@@ -8,13 +8,13 @@ function inputChangedAndConvertOneElement(sumOne) {
 
     //getting first element
     $.ajax({
-        url: '/api/currency/getCurrencyCost/' + idFirst,
+        url: '/api/currency/getCurrencyByID/' + idFirst,
         type: 'GET',
         dataType: 'json',
         contentType: 'application/json',
         async: false,
         success: function (currency) {
-            firstValueElement = currency.value * currency.nominal * sumOne;
+            firstValueElement = currency.value.value * currency.nominal * sumOne;
         }
     })
 
@@ -25,13 +25,13 @@ function inputChangedAndConvertOneElement(sumOne) {
 
     //getting second element
     $.ajax({
-        url: '/api/currency/getCurrencyCost/' + idSecond,
+        url: '/api/currency/getCurrencyByID/' + idSecond,
         type: 'GET',
         dataType: 'json',
         contentType: 'application/json',
         async: false,
         success: function (currency) {
-            secondValueElement = (1 / currency.value) * currency.nominal;
+            secondValueElement = (1 / currency.value.value) * currency.nominal;
         }
     })
 
@@ -50,13 +50,13 @@ function inputChangedAndConvertTwoElement(sumTwo) {
 
     //getting first element
     $.ajax({
-        url: '/api/currency/getCurrencyCost/' + idFirst,
+        url: '/api/currency/getCurrencyByID/' + idFirst,
         type: 'GET',
         dataType: 'json',
         contentType: 'application/json',
         async: false,
         success: function (currency) {
-            firstValueElement = (1 / currency.value) * currency.nominal;
+            firstValueElement = (1 / currency.value.value) * currency.nominal;
         }
     })
 
@@ -67,13 +67,13 @@ function inputChangedAndConvertTwoElement(sumTwo) {
 
     //getting second element
     $.ajax({
-        url: '/api/currency/getCurrencyCost/' + idSecond,
+        url: '/api/currency/getCurrencyByID/' + idSecond,
         type: 'GET',
         dataType: 'json',
         contentType: 'application/json',
         async: false,
         success: function (currency) {
-            secondValueElement = currency.value * currency.nominal * sumTwo;
+            secondValueElement = currency.value.value * currency.nominal * sumTwo;
 
         }
     })
@@ -92,25 +92,25 @@ function selectChangedAndConvertTwoElement(idTarget) {
     let secondValueElement = 0;
     //getting first element
     $.ajax({
-        url: '/api/currency/getCurrencyCost/' + id,
+        url: '/api/currency/getCurrencyByID/' + id,
         type: 'GET',
         dataType: 'json',
         contentType: 'application/json',
         async: false,
         success: function (currency) {
-            firstValueElement = currency.value * currency.nominal * sum;
+            firstValueElement = currency.value.value * currency.nominal * sum;
         }
     })
 
     //getting second element
     $.ajax({
-        url: '/api/currency/getCurrencyCost/' + idTarget,
+        url: '/api/currency/getCurrencyByID/' + idTarget,
         type: 'GET',
         dataType: 'json',
         contentType: 'application/json',
         async: false,
         success: function (currency) {
-            secondValueElement = (1 / currency.value) * currency.nominal;
+            secondValueElement = (1 / currency.value.value) * currency.nominal;
         }
     })
     let result = firstValueElement * secondValueElement;
@@ -125,13 +125,13 @@ function selectChangedAndConvertOneElement(idTarget) {
 
     //getting first element
     $.ajax({
-        url: '/api/currency/getCurrencyCost/' + idTarget,
+        url: '/api/currency/getCurrencyByID/' + idTarget,
         type: 'GET',
         dataType: 'json',
         contentType: 'application/json',
         async: false,
         success: function (currency) {
-            firstValueElement = currency.value * currency.nominal * sum;
+            firstValueElement = currency.value.value * currency.nominal * sum;
         }
     })
     //getting second element's id
@@ -140,13 +140,13 @@ function selectChangedAndConvertOneElement(idTarget) {
 
     //getting second element
     $.ajax({
-        url: '/api/currency/getCurrencyCost/' + id,
+        url: '/api/currency/getCurrencyByID/' + id,
         type: 'GET',
         dataType: 'json',
         contentType: 'application/json',
         async: false,
         success: function (currency) {
-            secondValueElement = (1 / currency.value) * currency.nominal;
+            secondValueElement = (1 / currency.value.value) * currency.nominal;
         }
     })
     let result = firstValueElement * secondValueElement;

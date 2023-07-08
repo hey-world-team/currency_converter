@@ -71,7 +71,9 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
                 preparedStatement.setString(2, currency.getName());
                 preparedStatement.setInt(3, currency.getNominal());
                 preparedStatement.setBigDecimal(4, currency.getValue().getValue());
-                preparedStatement.setDate(5, Date.valueOf(currency.getValue().getDate()));
+                preparedStatement.setDate(5, (currency.getValue().getDate() != null)
+                        ? Date.valueOf(currency.getValue().getDate())
+                        : null);
             }
 
             @Override
@@ -95,10 +97,30 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
                 "JOIN value v ON c.id = v.currency_id " +
                 "WHERE v.currency_id = ?";
         try {
-            return jdbcTemplate.queryForObject(selectQuery, new CurrencyMapper(), id);
+            Currency currency = jdbcTemplate.queryForObject(selectQuery, new CurrencyMapper(), id);
+            return currency;
         } catch (EmptyResultDataAccessException ex) {
             log.info("Currency with id {} not found", id);
-          return null;
+            return null;
+        }
+    }
+
+    @Override
+    public List<Currency> getCurrenciesByIds(List<String> ids) {
+        // Generate the placeholders for the IN clause
+        String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
+
+        // Construct the SQL query with the generated placeholders
+        String selectQuery = "SELECT c.id, c.name, c.nominal, v.value, v.date " +
+                "FROM currency c " +
+                "JOIN value v ON c.id = v.currency_id " +
+                "WHERE v.currency_id IN (" + placeholders + ")";
+
+        try {
+            return jdbcTemplate.query(selectQuery, new CurrencyMapper(), ids.toArray());
+        } catch (EmptyResultDataAccessException ex) {
+            log.info("Currencies with IDs {} not found", ids);
+            return null;
         }
     }
 
@@ -129,23 +151,23 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
     public int updateCurrencies(List<Currency> currencies) {
         String updateQuery = "update value set value = ?, date = ?  WHERE currency_id = ?";
         int rowsAffected = jdbcTemplate.batchUpdate(updateQuery, new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        Currency currency = currencies.get(i);
-                        ps.setBigDecimal(1, currency.getValue().getValue());
-                        if (currency.getValue().getDate() != null) {
-                            ps.setDate(2, Date.valueOf(currency.getValue().getDate()));
-                        } else {
-                            ps.setDate(2, null);
-                        }
-                        ps.setString(3, currency.getId());
-                    }
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Currency currency = currencies.get(i);
+                ps.setBigDecimal(1, currency.getValue().getValue());
+                if (currency.getValue().getDate() != null) {
+                    ps.setDate(2, Date.valueOf(currency.getValue().getDate()));
+                } else {
+                    ps.setDate(2, null);
+                }
+                ps.setString(3, currency.getId());
+            }
 
-                    @Override
-                    public int getBatchSize() {
-                        return currencies.size();
-                    }
-                }).length;
+            @Override
+            public int getBatchSize() {
+                return currencies.size();
+            }
+        }).length;
         if (rowsAffected > 0) {
             return rowsAffected;
         } else {
@@ -158,7 +180,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepository {
     public List<Currency> getCurrencyByPeriod(LocalDate startDate, LocalDate endDate, String idFirst, String idSecond) {
         String selectQuery =
                 "SELECT c.id, c.name, c.nominal, v.value, v.date " +
-                "FROM currency c " +
+                        "FROM currency c " +
                         "JOIN value v ON c.id = v.currency_id " +
                         "WHERE (id = ? OR id = ?) AND " +
                         "date >= ? AND " +

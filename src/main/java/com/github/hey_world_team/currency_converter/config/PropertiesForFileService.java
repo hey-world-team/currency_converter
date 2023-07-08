@@ -16,6 +16,10 @@ public class PropertiesForFileService {
     private String fileName;
     @Value("${charset}")
     private String charset;
+    @Value("binance_api_key")
+    private String bKey;
+    @Value("binance_api_secret")
+    private String bSecret;
 
     public String getPath() {
         return path;

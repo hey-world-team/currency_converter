@@ -39,9 +39,11 @@
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
     </dependency>
-
-
-
+    <dependency>
+      <groupId>io.github.binance</groupId>
+      <artifactId>binance-connector-java</artifactId>
+      <version>3.0.0rc2</version>
+    </dependency>
     <!-- <scope>test</scope> -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
