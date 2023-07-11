@@ -51,7 +51,7 @@ public class HistoryService {
      * @param inputCurrency the input currency for which to retrieve the history
      * @return the list of History objects for the specified input currency
      */
-    public List<History> getCurrencyHistoryById(String inputCurrency) {
+    public List<History> getCurrencyHistoryByInputCurrency(String inputCurrency) {
         return historyRepository.getCurrencyHistoryByInputCurrency(inputCurrency);
     }
 
@@ -81,11 +81,3 @@ public class HistoryService {
         historyRepository.clearHistory();
     }
 }
-
-
-
-
-
-
-
-

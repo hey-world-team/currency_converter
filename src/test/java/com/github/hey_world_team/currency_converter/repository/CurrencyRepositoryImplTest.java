@@ -150,8 +150,7 @@ public class CurrencyRepositoryImplTest {
 
         CurrencyRepositoryImpl currencyRepository = new CurrencyRepositoryImpl(mockJdbcTemplate);
         // Act and Assert
-        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                RuntimeException.class,
+        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class,
                 () -> currencyRepository.saveCurrency(currency)
         );
         assertEquals("Failed to save currency with id: USD", exception.getMessage());
@@ -201,8 +200,7 @@ public class CurrencyRepositoryImplTest {
         currency.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
 
         // Act and Assert
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
+        RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> currencyRepository.updateCurrency(currency)
         );
         assertEquals("Failed to update currency with id: " + currency.getId(), exception.getMessage());
@@ -398,7 +396,6 @@ public class CurrencyRepositoryImplTest {
     @Test
     public void saveHistory_ShouldThrowException_WhenSaveFails() {
         // Arrange
-
         History history = new History();
         history.setId(1);
         history.setConversionDate(LocalDate.now());
@@ -413,8 +410,7 @@ public class CurrencyRepositoryImplTest {
 
         CurrencyRepositoryImpl currencyRepository = new CurrencyRepositoryImpl(mockJdbcTemplate);
         // Act and Assert
-        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                RuntimeException.class,
+        RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class,
                 () -> currencyRepository.saveHistory(history)
         );
         assertEquals("Failed to save history with id: " + history.getId(), exception.getMessage());
@@ -463,7 +459,6 @@ public class CurrencyRepositoryImplTest {
         history.setInputAmount(new BigDecimal("60"));
         history.setOutputCurrency("EUR");
         history.setOutputAmount(new BigDecimal("65"));
-        List<History> expectedHistoryList = new ArrayList<>();
 
         // Create a history record2
         History history1 = new History();
@@ -508,7 +503,6 @@ public class CurrencyRepositoryImplTest {
         history.setInputAmount(new BigDecimal("60"));
         history.setOutputCurrency("EUR");
         history.setOutputAmount(new BigDecimal("65"));
-        List<History> expectedHistoryList = new ArrayList<>();
 
         // Create a history record2
         History history1 = new History();

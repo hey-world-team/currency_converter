@@ -347,4 +347,3 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
         jdbcTemplate.update(selectQuery);
     }
 }
-

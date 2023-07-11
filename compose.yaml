@@ -15,6 +15,7 @@ services:
     container_name: vault
     ports:
       - 8300:8200
+
   springboot-app:
     build:
       context: .

@@ -38,7 +38,8 @@ public class CentralBankApiController {
 
     @Autowired
     public CentralBankApiController(CurrencyService currencyService,
-                                    FileService fileService, HistoryService historyService) {
+                                    FileService fileService,
+                                    HistoryService historyService) {
         this.fileService = fileService;
         this.currencyService = currencyService;
         this.historyService = historyService;

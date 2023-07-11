@@ -36,4 +36,3 @@ public class HistoryMapper implements RowMapper<History> {
         );
     }
 }
-
