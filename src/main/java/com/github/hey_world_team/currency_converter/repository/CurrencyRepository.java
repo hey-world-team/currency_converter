@@ -5,6 +5,9 @@ import com.github.hey_world_team.currency_converter.model.Currency;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * CurrencyRepository provides methods for working with the Currency data store
+ */
 public interface CurrencyRepository {
     String saveCurrency(Currency currency);
 

@@ -25,8 +25,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.Double.parseDouble;
 
+/**
+ * FileService is responsible for reading and writing data to a file,
+ * preparing data for saving to a database
+ */
 @Service
 public class FileService {
 
@@ -51,6 +54,13 @@ public class FileService {
         this.currencies = new ArrayList<>();
     }
 
+    /**
+     * This method prepare database depending on the passed status and file path
+     *
+     * @param status the status indicates how the database should be prepared
+     * @param path   the file path to the XML data
+     * @return the number of records prepared in the DB
+     */
     public int prepareDataBase(DataBasePrepare status, String path) {
         log.info("start prepare data base");
         if (path == null) {
@@ -61,6 +71,9 @@ public class FileService {
         return preparingDB(status);
     }
 
+    /**
+     * This method loads data from an external source and parses the XML file
+     */
     private void prepareCollectionByDownloadFile() {
         var restTemplate = new RestTemplate();
         String currenciesXml = restTemplate.getForObject(link, String.class);
@@ -75,19 +88,30 @@ public class FileService {
         }
     }
 
+    /**
+     * This method parses an XML file from the specified path
+     *
+     * @param path the file path to the XML data
+     */
     private void prepareCollectionFromFile(String path) {
         log.info("start parsing data to collection");
         parseXmlToCollectionObjects(path);
         log.info("end parsing data to  collection");
     }
 
+    /**
+     * This method adds or updates records in the database depending on the status
+     *
+     * @param status the status indicating the operation to be performed
+     * @return the number of records prepared in the DB
+     */
     private int preparingDB(DataBasePrepare status) {
         int count = 0;
         if (status.equals(DataBasePrepare.CREATE)) {
             log.info("data base is empty need to create new records");
-            this.currencies.add(new Currency("RUB", "Российский рубль",  1, new Value()));
+            this.currencies.add(new Currency("RUB", "Российский рубль", 1, new Value(null, LocalDate.now())));
             count = currencyRepository.saveCurrencies(currencies);
-        } else if (status.equals(DataBasePrepare.UPDATE)){
+        } else if (status.equals(DataBasePrepare.UPDATE)) {
             log.info("data base is not empty need to update values");
             count = currencyRepository.updateCurrencies(currencies);
         } else {
@@ -98,8 +122,10 @@ public class FileService {
     }
 
     /**
-     * @param file
-     * @return answer to controller
+     * This method writes the passed file to the specified path.
+     *
+     * @param file the file to be written
+     * @return the result of operation, an answer to the controller
      */
     public String writeToFile(String file) {
         log.info("Started to read file {}", fileForeignCurrencies);
@@ -116,7 +142,9 @@ public class FileService {
     }
 
     /**
+     * This method parses the XML file into a collection of Currency objects
      *
+     * @param path the file path to the XML data
      */
     public void parseXmlToCollectionObjects(String path) {
         log.info("Started writing XML to object");
@@ -141,7 +169,7 @@ public class FileService {
         }
 
         String dateAttribute = doc.select("ValCurs").attr("Date");
-        LocalDate date = LocalDate.parse(dateAttribute, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        LocalDate date = LocalDate.parse(dateAttribute, DateTimeFormatter.ofPattern("d.MM.yyyy"));
         for (Element e : doc.select(CURRENCY_TAG_NAME)) {
             String id = e.getElementsByTag("CharCode").text();
             String name = e.getElementsByTag("Name").text();

@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * This class represents a currency with its properties and value,
  * POJO currency
  */
 @Data

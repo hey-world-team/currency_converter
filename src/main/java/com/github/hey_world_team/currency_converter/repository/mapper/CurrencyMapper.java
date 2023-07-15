@@ -8,9 +8,22 @@ import org.springframework.stereotype.Component;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * CurrencyMapper implements the RowMapper<Currency> interface,
+ * which is used to map SQL query result rows to a Currency object
+ */
 @Component
 public class CurrencyMapper implements RowMapper<Currency> {
 
+    /**
+     * This method creates a new Currency object,
+     * using the values from the current row of the ResultSet
+     *
+     * @param rs     the ResultSet to be mapped from DB
+     * @param rowNum the number of the current row
+     * @return a Currency object mapped from the current row of the ResultSet
+     * @throws SQLException if a SQLException is encountered while processing the ResultSet
+     */
     @Override
     public Currency mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new Currency(
@@ -22,6 +35,7 @@ public class CurrencyMapper implements RowMapper<Currency> {
                         (rs.getDate("date") != null)
                                 ? rs.getDate("date").toLocalDate()
                                 : null
-        ));
+                )
+        );
     }
 }

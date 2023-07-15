@@ -5,6 +5,9 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * This class  represents a value with decimal precision and its corresponding date
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
