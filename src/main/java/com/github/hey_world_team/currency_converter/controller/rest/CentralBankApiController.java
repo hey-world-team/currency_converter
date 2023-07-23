@@ -1,7 +1,9 @@
 package com.github.hey_world_team.currency_converter.controller.rest;
 
+import com.github.hey_world_team.currency_converter.model.ConversionResponse;
 import com.github.hey_world_team.currency_converter.model.Currency;
 import com.github.hey_world_team.currency_converter.model.History;
+import com.github.hey_world_team.currency_converter.service.ConversionService;
 import com.github.hey_world_team.currency_converter.service.CurrencyService;
 import com.github.hey_world_team.currency_converter.service.FileService;
 import com.github.hey_world_team.currency_converter.service.HistoryService;
@@ -17,6 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -32,6 +35,7 @@ public class CentralBankApiController {
     private final CurrencyService currencyService;
     private final FileService fileService;
     private final HistoryService historyService;
+    private final ConversionService conversionService;
 
     //TODO for future api with current date
     //private static final String DATE_API = "date_req";
@@ -39,10 +43,11 @@ public class CentralBankApiController {
     @Autowired
     public CentralBankApiController(CurrencyService currencyService,
                                     FileService fileService,
-                                    HistoryService historyService) {
+                                    HistoryService historyService, ConversionService conversionService) {
         this.fileService = fileService;
         this.currencyService = currencyService;
         this.historyService = historyService;
+        this.conversionService = conversionService;
     }
 
     /**
@@ -70,6 +75,19 @@ public class CentralBankApiController {
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PostMapping(value = "/convert")
+    public ResponseEntity<ConversionResponse> convertCurrency(
+            @RequestParam("amount") BigDecimal amount,
+            @RequestParam("sourceCurrency") String sourceCurrency,
+            @RequestParam("costUSDT") BigDecimal costUSDT,
+            @RequestParam("costETH") BigDecimal costETH,
+            @RequestParam("costBTC") BigDecimal costBTC,
+            @RequestParam("targetCurrency") String targetCurrency) {
+
+        ConversionResponse result = conversionService.convertCurrency(amount, sourceCurrency,costUSDT, costETH, costBTC, targetCurrency);
+
+         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 
     /**
      * This method returns a list of identifiers for all currencies
