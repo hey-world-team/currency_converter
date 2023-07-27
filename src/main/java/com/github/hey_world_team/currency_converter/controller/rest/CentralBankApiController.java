@@ -1,6 +1,6 @@
 package com.github.hey_world_team.currency_converter.controller.rest;
 
-import com.github.hey_world_team.currency_converter.model.ConversionResponse;
+import com.github.hey_world_team.currency_converter.model.BestConversion;
 import com.github.hey_world_team.currency_converter.model.Currency;
 import com.github.hey_world_team.currency_converter.model.History;
 import com.github.hey_world_team.currency_converter.service.ConversionService;
@@ -76,8 +76,20 @@ public class CentralBankApiController {
                 : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    /**
+     * This method converts the specified amount from the source currency
+     * to the target currency using the given conversion rates
+     *
+     * @param amount         The amount to convert
+     * @param sourceCurrency The source currency code ("USD", "RUB" or "EUR")
+     * @param costUSDT       The cost of 1 unit of the cryptocurrency USDT in the source currency
+     * @param costETH        The cost of 1 unit of the cryptocurrency ETH in the source currency
+     * @param costBTC        The cost of 1 unit of the cryptocurrency BTC in the source currency
+     * @param targetCurrency The target currency code ("USD", "RUB" or "EUR")
+     * @return ResponseEntity containing the best conversion result
+     */
     @PostMapping(value = "/convert")
-    public ResponseEntity<ConversionResponse> convertCurrency(
+    public ResponseEntity<BestConversion> convertCurrency(
             @RequestParam("amount") BigDecimal amount,
             @RequestParam("sourceCurrency") String sourceCurrency,
             @RequestParam("costUSDT") BigDecimal costUSDT,
@@ -85,9 +97,11 @@ public class CentralBankApiController {
             @RequestParam("costBTC") BigDecimal costBTC,
             @RequestParam("targetCurrency") String targetCurrency) {
 
-        ConversionResponse result = conversionService.convertCurrency(amount, sourceCurrency,costUSDT, costETH, costBTC, targetCurrency);
+        BestConversion result = conversionService.convertCurrency(amount, sourceCurrency, costUSDT, costETH, costBTC, targetCurrency);
 
-         return new ResponseEntity<>(result, HttpStatus.OK);
+        return (result != null)
+                ? new ResponseEntity<>(result, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     /**
@@ -147,7 +161,7 @@ public class CentralBankApiController {
      * @param endDate   the end date of the period
      * @param idFirst   the identifier of the first currency
      * @param idSecond  the identifier of the second currency
-     * @return ResponseEntity with the list of currencies.
+     * @return ResponseEntity with the list of currencies
      */
     @GetMapping("/byPeriod")
     public ResponseEntity<List<Currency>> getCurrencyByPeriod(
@@ -224,5 +238,17 @@ public class CentralBankApiController {
     public ResponseEntity<String> exceptionHandlerRuntime(Throwable runtimeErr) {
         String runTimeMessage = runtimeErr.getMessage();
         return new ResponseEntity<>(runTimeMessage, HttpStatus.NO_CONTENT);
+    }
+
+    /**
+     * Exception handler for "IllegalArgumentException"
+     *
+     * @param illegal the thrown IllegalArgumentException
+     * @return ResponseEntity with error's message "NO_CONTENT"
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> exceptionHandlerIAE(Throwable illegal) {
+        String illegalMessage = illegal.getMessage();
+        return new ResponseEntity<>(illegalMessage, HttpStatus.BAD_REQUEST);
     }
 }
