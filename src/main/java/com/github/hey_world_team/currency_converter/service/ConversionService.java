@@ -19,21 +19,20 @@ public class ConversionService {
 
     @Autowired
     public ConversionService(CurrencyService service) {
-        // Rub 100000
         cryptoRatesToUsd = new LinkedHashMap<>();
-        cryptoRatesToUsd.put("USDT", new BigDecimal("1.01")); // Курс USDT к USD
-        cryptoRatesToUsd.put("ETH", new BigDecimal("1880")); // Курс ETH к USD
-        cryptoRatesToUsd.put("BTC", new BigDecimal("29800")); // Курс BTC к USD
-        // USD 10000
+        cryptoRatesToUsd.put("USDT", new BigDecimal("1.01")); // USDT to USD exchange rate
+        cryptoRatesToUsd.put("ETH", new BigDecimal("1880")); // ETH to USD exchange rate
+        cryptoRatesToUsd.put("BTC", new BigDecimal("29800")); // BTC to USD exchange rate
+
         cryptoRatesToRub = new LinkedHashMap<>();
-        cryptoRatesToRub.put("USDT", new BigDecimal("92")); // Курс USDT к RUB
-        cryptoRatesToRub.put("ETH", new BigDecimal("173000")); // Курс ETH к RUB
-        cryptoRatesToRub.put("BTC", new BigDecimal("2456000")); // Курс BTC к RUB
-        // EUR 10000
+        cryptoRatesToRub.put("USDT", new BigDecimal("92")); // USDT to RUB exchange rate
+        cryptoRatesToRub.put("ETH", new BigDecimal("173000")); // ETH to RUB exchange rate
+        cryptoRatesToRub.put("BTC", new BigDecimal("2456000")); // BTC to RUB exchange rate
+
         cryptoRatesToEur = new LinkedHashMap<>();
-        cryptoRatesToEur.put("USDT", new BigDecimal("99")); // Курс USDT к RUB
-        cryptoRatesToEur.put("ETH", new BigDecimal("183000")); // Курс ETH к RUB
-        cryptoRatesToEur.put("BTC", new BigDecimal("2656000")); // Курс BTC к RUB
+        cryptoRatesToEur.put("USDT", new BigDecimal("99")); // USDT to EUR exchange rate
+        cryptoRatesToEur.put("ETH", new BigDecimal("183000")); // ETH to EUR exchange rate
+        cryptoRatesToEur.put("BTC", new BigDecimal("2656000")); // BTC to EUR exchange rate
     }
 
     public BestConversion convertCurrency(BigDecimal amount,
@@ -48,7 +47,7 @@ public class ConversionService {
         costList.add(costETH);
         costList.add(costBTC);
 
-        // Проверяем, соответствует ли sourceCurrency одному из значений USD, RUB или EURO
+        // Checking if sourceCurrency corresponds to one of the values USD, RUB, or EURO
         if (!Arrays.asList("USD", "RUB", "EUR").contains(sourceCurrency.toUpperCase()) ||
                 !Arrays.asList("USD", "RUB", "EUR").contains(targetCurrency.toUpperCase()) ||
                 sourceCurrency.equalsIgnoreCase(targetCurrency)) {
@@ -80,10 +79,10 @@ public class ConversionService {
             BigDecimal convertedAmount = amount.divide(costList.get(i), SCALE, RoundingMode.HALF_EVEN)
                     .multiply(cryptoRates.get(crypto));
 
-            // Сравниваем convertedAmount с текущим bestRate
+            //  Comparing convertedAmount with the current bestRate
             int compareResult = convertedAmount.compareTo(bestRate);
 
-            // Если convertedAmount больше bestRate, обновляем bestRate
+            //  If convertedAmount is greater than bestRate, update bestRate
             if (compareResult > 0) {
                 bestRate = convertedAmount;
                 bestCrypto = crypto;
