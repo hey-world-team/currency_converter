@@ -9,15 +9,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * CurrencyMapper implements the RowMapper<Currency> interface,
- * which is used to map SQL query result rows to a Currency object
+ * CurrencyMapper implements the RowMapper<Currency> interface, which is used to map SQL query result rows to a Currency
+ * object
  */
 @Component
 public class CurrencyMapper implements RowMapper<Currency> {
 
     /**
-     * This method creates a new Currency object,
-     * using the values from the current row of the ResultSet
+     * This method creates a new Currency object, using the values from the current row of the ResultSet
      *
      * @param rs     the ResultSet to be mapped from DB
      * @param rowNum the number of the current row
@@ -27,15 +26,15 @@ public class CurrencyMapper implements RowMapper<Currency> {
     @Override
     public Currency mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new Currency(
-                rs.getString("id"),
-                rs.getString("name"),
-                rs.getInt("nominal"),
-                new Value(
-                        rs.getBigDecimal("value"),
-                        (rs.getDate("date") != null)
-                                ? rs.getDate("date").toLocalDate()
-                                : null
-                )
+            rs.getString("id"),
+            rs.getString("name"),
+            rs.getInt("nominal"),
+            new Value(
+                rs.getBigDecimal("value"),
+                (rs.getDate("date") != null)
+                ? rs.getDate("date").toLocalDate()
+                : null
+            )
         );
     }
 }

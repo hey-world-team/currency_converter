@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- *  This class represents a currency conversion history record
+ * This class represents a currency conversion history record
  */
 @Data
 @AllArgsConstructor

@@ -55,14 +55,14 @@ public class CurrencyService {
      */
     public Collection<Currency> getAllCurrency(LocalDate date) {
         return repository.getAllCurrency(date)
-                .stream()
-                .map(currency -> Currency.builder()
-                        .id(currency.getId())
-                        .value(currency.getValue())
-                        .name(currency.getName())
-                        .nominal(currency.getNominal())
-                        .build())
-                .collect(Collectors.toList());
+                         .stream()
+                         .map(currency -> Currency.builder()
+                                                  .id(currency.getId())
+                                                  .value(currency.getValue())
+                                                  .name(currency.getName())
+                                                  .nominal(currency.getNominal())
+                                                  .build())
+                         .collect(Collectors.toList());
     }
 
     /**
@@ -75,8 +75,7 @@ public class CurrencyService {
     }
 
     /**
-     * This method returns a list of Currency objects within the specified period
-     * and with the specified identifiers
+     * This method returns a list of Currency objects within the specified period and with the specified identifiers
      *
      * @param startDate the start date of the period
      * @param endDate   the end date of the period

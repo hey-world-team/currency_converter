@@ -1,7 +1,9 @@
 package com.github.hey_world_team.currency_converter.controller.rest;
 
+import com.github.hey_world_team.currency_converter.model.BestConversion;
 import com.github.hey_world_team.currency_converter.model.Currency;
 import com.github.hey_world_team.currency_converter.model.History;
+import com.github.hey_world_team.currency_converter.service.ConversionService;
 import com.github.hey_world_team.currency_converter.service.CurrencyService;
 import com.github.hey_world_team.currency_converter.service.FileService;
 import com.github.hey_world_team.currency_converter.service.HistoryService;
@@ -17,6 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -32,6 +35,7 @@ public class CentralBankApiController {
     private final CurrencyService currencyService;
     private final FileService fileService;
     private final HistoryService historyService;
+    private final ConversionService conversionService;
 
     //TODO for future api with current date
     //private static final String DATE_API = "date_req";
@@ -39,15 +43,16 @@ public class CentralBankApiController {
     @Autowired
     public CentralBankApiController(CurrencyService currencyService,
                                     FileService fileService,
-                                    HistoryService historyService) {
+                                    HistoryService historyService,
+                                    ConversionService conversionService) {
         this.fileService = fileService;
         this.currencyService = currencyService;
         this.historyService = historyService;
+        this.conversionService = conversionService;
     }
 
     /**
-     * This method calls "prepareDataBase" method if  database is empty,
-     * executed after the class is instantiated
+     * This method calls "prepareDataBase" method if  database is empty, executed after the class is instantiated
      */
     @PostConstruct
     public void onStartup() {
@@ -66,10 +71,42 @@ public class CentralBankApiController {
         log.info("access to API get conversion history");
         Collection<History> history = historyService.getCurrencyHistory();
         return (history != null && !history.isEmpty())
-                ? new ResponseEntity<>(history, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+               ? new ResponseEntity<>(history, HttpStatus.OK)
+               : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    /**
+     * This method converts the specified amount from the source currency to the target currency using the given
+     * conversion rates
+     *
+     * @param amount         The amount to convert
+     * @param sourceCurrency The source currency code ("USD", "RUB" or "EUR")
+     * @param costUSDT       The cost of 1 unit of the cryptocurrency USDT in the source currency
+     * @param costETH        The cost of 1 unit of the cryptocurrency ETH in the source currency
+     * @param costBTC        The cost of 1 unit of the cryptocurrency BTC in the source currency
+     * @param targetCurrency The target currency code ("USD", "RUB" or "EUR")
+     * @return ResponseEntity containing the best conversion result
+     */
+    @PostMapping(value = "/convert")
+    public ResponseEntity<BestConversion> convertCurrency(
+        @RequestParam("amount") BigDecimal amount,
+        @RequestParam("sourceCurrency") String sourceCurrency,
+        @RequestParam("costUSDT") BigDecimal costUSDT,
+        @RequestParam("costETH") BigDecimal costETH,
+        @RequestParam("costBTC") BigDecimal costBTC,
+        @RequestParam("targetCurrency") String targetCurrency) {
+
+        BestConversion result = conversionService.convertCurrency(amount,
+                                                                  sourceCurrency,
+                                                                  costUSDT,
+                                                                  costETH,
+                                                                  costBTC,
+                                                                  targetCurrency);
+
+        return (result != null)
+               ? new ResponseEntity<>(result, HttpStatus.OK)
+               : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
     /**
      * This method returns a list of identifiers for all currencies
@@ -82,8 +119,8 @@ public class CentralBankApiController {
         log.info("access to path {}", entity.getUrl());
         List<String> ids = currencyService.getAllCurrenciesId();
         return (ids != null && !ids.isEmpty())
-                ? new ResponseEntity<>(ids, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+               ? new ResponseEntity<>(ids, HttpStatus.OK)
+               : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     /**
@@ -95,13 +132,13 @@ public class CentralBankApiController {
      */
     @GetMapping(value = "/getAllCurrenciesByDate")
     public ResponseEntity<Collection<Currency>> getAllCurrenciesByDate(
-            RequestEntity<?> entity,
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        RequestEntity<?> entity,
+        @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         log.info("access to path {}", entity.getUrl());
         Collection<Currency> currencies = currencyService.getAllCurrency(date);
         return (currencies != null && !currencies.isEmpty())
-                ? new ResponseEntity<>(currencies, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+               ? new ResponseEntity<>(currencies, HttpStatus.OK)
+               : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     /**
@@ -112,34 +149,33 @@ public class CentralBankApiController {
      */
     @GetMapping(value = "/getCurrencyCost/{currencyId}")
     public ResponseEntity<Currency> getCurrencyCostById(
-            @PathVariable(value = "currencyId") String currencyId) {
+        @PathVariable(value = "currencyId") String currencyId) {
         log.info("access to API get currency cost by id: {}", currencyId);
         Currency currencyDto = currencyService.getCurrencyCost(currencyId);
         return (currencyDto != null)
-                ? new ResponseEntity<>(currencyDto, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+               ? new ResponseEntity<>(currencyDto, HttpStatus.OK)
+               : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     /**
-     * This method returns a list of currencies for the specified period
-     * and with the specified currency identifiers
+     * This method returns a list of currencies for the specified period and with the specified currency identifiers
      *
      * @param startDate the start date of the period
      * @param endDate   the end date of the period
      * @param idFirst   the identifier of the first currency
      * @param idSecond  the identifier of the second currency
-     * @return ResponseEntity with the list of currencies.
+     * @return ResponseEntity with the list of currencies
      */
     @GetMapping("/byPeriod")
     public ResponseEntity<List<Currency>> getCurrencyByPeriod(
-            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam("currencyIdFirst") String idFirst,
-            @RequestParam("currencyIdSecond") String idSecond) {
+        @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+        @RequestParam("currencyIdFirst") String idFirst,
+        @RequestParam("currencyIdSecond") String idSecond) {
         List<Currency> currencyData = currencyService.getCurrencyByPeriod(startDate, endDate, idFirst, idSecond);
         return (!currencyData.isEmpty())
-                ? new ResponseEntity<>(currencyData, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+               ? new ResponseEntity<>(currencyData, HttpStatus.OK)
+               : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     /**
@@ -152,9 +188,9 @@ public class CentralBankApiController {
      */
     @PostMapping(value = "/prepareDataBase")
     public ResponseEntity<String> updateCurrencies(
-            RequestEntity<?> entity,
-            @RequestParam("status") String status,
-            @RequestParam(value = "path", required = false) String path) {
+        RequestEntity<?> entity,
+        @RequestParam("status") String status,
+        @RequestParam(value = "path", required = false) String path) {
         log.info("access to path {}", entity.getUrl());
         int affectedRows = 0;
         if (status.equals(DataBasePrepare.UPDATE.name())) {
@@ -166,14 +202,13 @@ public class CentralBankApiController {
         }
 
         return (affectedRows > 0)
-                ? new ResponseEntity<>("Count of updated rows: " + affectedRows, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
+               ? new ResponseEntity<>("Count of updated rows: " + affectedRows, HttpStatus.OK)
+               : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     /**
-     * This method updates the database on a schedule and writes information about it into the log,
-     * is scheduled to run automatically every day at 01:01 AM,
-     * it starts the database update process and logs the number of affected rows.
+     * This method updates the database on a schedule and writes information about it into the log, is scheduled to run
+     * automatically every day at 01:01 AM, it starts the database update process and logs the number of affected rows.
      * The database update is performed using the fileService's prepareDataBase method
      */
     @Scheduled(cron = "0 1 1 * * ?")//every day at 01:01 AM
@@ -204,6 +239,18 @@ public class CentralBankApiController {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> exceptionHandlerRuntime(Throwable runtimeErr) {
         String runTimeMessage = runtimeErr.getMessage();
-        return new ResponseEntity<>(runTimeMessage, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(runTimeMessage, HttpStatus.BAD_GATEWAY);
+    }
+
+    /**
+     * Exception handler for "IllegalArgumentException"
+     *
+     * @param illegal the thrown IllegalArgumentException
+     * @return ResponseEntity with error's message "NO_CONTENT"
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> exceptionHandlerIAE(Throwable illegal) {
+        String illegalMessage = illegal.getMessage();
+        return new ResponseEntity<>(illegalMessage, HttpStatus.BAD_REQUEST);
     }
 }
