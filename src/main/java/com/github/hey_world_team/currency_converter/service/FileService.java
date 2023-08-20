@@ -27,8 +27,7 @@ import java.util.List;
 
 
 /**
- * FileService is responsible for reading and writing data to a file,
- * preparing data for saving to a database
+ * FileService is responsible for reading and writing data to a file, preparing data for saving to a database
  */
 @Service
 public class FileService {
@@ -174,8 +173,8 @@ public class FileService {
             String id = e.getElementsByTag("CharCode").text();
             String name = e.getElementsByTag("Name").text();
             BigDecimal value = BigDecimal.valueOf(Double.parseDouble(e.getElementsByTag("Value")
-                    .text()
-                    .replace(',', '.')));
+                                                                      .text()
+                                                                      .replace(',', '.')));
             Integer nominal = Integer.valueOf(e.getElementsByTag("Nominal").text());
             Value currencyValue = new Value(value, date);
             Currency currency = new Currency(id, name, nominal, currencyValue);

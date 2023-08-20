@@ -9,6 +9,7 @@ import java.util.List;
  * CurrencyRepository provides methods for working with the Currency data store
  */
 public interface CurrencyRepository {
+
     String saveCurrency(Currency currency);
 
     Currency getCurrencyById(String id);

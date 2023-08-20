@@ -9,15 +9,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * HistoryMapper implements the RowMapper<History> interface,
- * which is used to map SQL query result rows to a History object
+ * HistoryMapper implements the RowMapper<History> interface, which is used to map SQL query result rows to a History
+ * object
  */
 @Component
 public class HistoryMapper implements RowMapper<History> {
 
     /**
-     * This method creates a new History object,
-     * using the values from the current row of the ResultSet
+     * This method creates a new History object, using the values from the current row of the ResultSet
      *
      * @param rs     the ResultSet to be mapped from DB
      * @param rowNum the number of the current row
@@ -27,12 +26,12 @@ public class HistoryMapper implements RowMapper<History> {
     @Override
     public History mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new History(
-                rs.getInt("id"),
-                rs.getDate("conversion_date").toLocalDate(),
-                rs.getString("input_currency"),
-                rs.getBigDecimal("input_amount"),
-                rs.getString("output_currency"),
-                rs.getBigDecimal("output_amount")
+            rs.getInt("id"),
+            rs.getDate("conversion_date").toLocalDate(),
+            rs.getString("input_currency"),
+            rs.getBigDecimal("input_amount"),
+            rs.getString("output_currency"),
+            rs.getBigDecimal("output_amount")
         );
     }
 }

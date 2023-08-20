@@ -49,9 +49,10 @@ public class ConversionService {
 
         // Checking if sourceCurrency corresponds to one of the values USD, RUB, or EURO
         if (!Arrays.asList("USD", "RUB", "EUR").contains(sourceCurrency.toUpperCase()) ||
-                !Arrays.asList("USD", "RUB", "EUR").contains(targetCurrency.toUpperCase()) ||
-                sourceCurrency.equalsIgnoreCase(targetCurrency)) {
-            throw new IllegalArgumentException("Invalid sourceCurrency or targetCurrency. Only USD, RUB, or EUR are allowed.");
+            !Arrays.asList("USD", "RUB", "EUR").contains(targetCurrency.toUpperCase()) ||
+            sourceCurrency.equalsIgnoreCase(targetCurrency)) {
+            throw new IllegalArgumentException(
+                "Invalid sourceCurrency or targetCurrency. Only USD, RUB, or EUR are allowed.");
         }
         response = findBestCryptoPrice(amount, costList, sourceCurrency, targetCurrency);
         return response;
@@ -68,7 +69,7 @@ public class ConversionService {
             cryptoRates = cryptoRatesToUsd;
         } else if ("EUR".equalsIgnoreCase(targetCurrency)) {
             cryptoRates = cryptoRatesToEur;
-        } else cryptoRates = cryptoRatesToRub;
+        } else {cryptoRates = cryptoRatesToRub;}
 
         String bestCrypto = null;
         BigDecimal bestRate = BigDecimal.ZERO;
@@ -77,7 +78,7 @@ public class ConversionService {
 
         for (String crypto : cryptoRates.keySet()) {
             BigDecimal convertedAmount = amount.divide(costList.get(i), SCALE, RoundingMode.HALF_EVEN)
-                    .multiply(cryptoRates.get(crypto));
+                                               .multiply(cryptoRates.get(crypto));
 
             //  Comparing convertedAmount with the current bestRate
             int compareResult = convertedAmount.compareTo(bestRate);
@@ -90,7 +91,11 @@ public class ConversionService {
             i++;
         }
         result.setConvertedAmount(bestRate);
-        result.setConversionPath(String.format("The best way from %s to %s across %s will be costs %s", sourceCurrency, targetCurrency, bestCrypto, bestRate));
+        result.setConversionPath(String.format("The best way from %s to %s across %s will be costs %s",
+                                               sourceCurrency,
+                                               targetCurrency,
+                                               bestCrypto,
+                                               bestRate));
         return result;
     }
 }

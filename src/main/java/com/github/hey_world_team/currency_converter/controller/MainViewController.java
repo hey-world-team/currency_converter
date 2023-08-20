@@ -12,8 +12,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 /**
- * MainViewController is the controller for handling HTTP requests in the application
- * It is responsible for displaying various pages and transferring data between the client and the server
+ * MainViewController is the controller for handling HTTP requests in the application It is responsible for displaying
+ * various pages and transferring data between the client and the server
  */
 @Controller
 public class MainViewController {
@@ -28,9 +28,8 @@ public class MainViewController {
     }
 
     /**
-     * This method  handles GET request along the "/" path, creates an  ModelAndView object with view "index",
-     * gets current date and list of all currencies by method "getAllCurrency"
-     * and  adds it to the model as the attribute
+     * This method  handles GET request along the "/" path, creates an  ModelAndView object with view "index", gets
+     * current date and list of all currencies by method "getAllCurrency" and  adds it to the model as the attribute
      *
      * @return a ModelAndView object
      */

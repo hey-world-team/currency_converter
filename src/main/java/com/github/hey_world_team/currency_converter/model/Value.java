@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @ToString
 @Builder
 public class Value {
+
     private BigDecimal value;
     private LocalDate date;
 }

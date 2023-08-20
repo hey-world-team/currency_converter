@@ -19,9 +19,8 @@ import java.time.LocalDate;
 import java.util.*;
 
 /**
- * CurrencyRepositoryImpl provides implementation of methods for working with the database,
- * functionality for working with currency data and conversion history,
- * and also provides interaction with the database through JdbcTemplate
+ * CurrencyRepositoryImpl provides implementation of methods for working with the database, functionality for working
+ * with currency data and conversion history, and also provides interaction with the database through JdbcTemplate
  */
 @Repository
 public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryRepository {
@@ -35,8 +34,8 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
     }
 
     /**
-     * This method saves Currency object in the data store.
-     * It executes SQL queries to insert the currency and its value into the currency and value tables
+     * This method saves Currency object in the data store. It executes SQL queries to insert the currency and its value
+     * into the currency and value tables
      *
      * @param currency the Currency object to be saved
      * @return the id of the saved currency. Otherwise, it throws a RuntimeException
@@ -44,19 +43,19 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
     @Override
     public String saveCurrency(Currency currency) {
         String insertQuery = "WITH inserted_currency AS (" +
-                "    INSERT INTO currency (id, name, nominal) " +
-                "    VALUES (?, ?, ?) " +
-                "    RETURNING id" +
-                ") " +
-                "INSERT INTO value (uuid,   currency_id, value, date) " +
-                "VALUES (uuid_generate_v4(), (SELECT id FROM inserted_currency), ?, ?)";
+                             "    INSERT INTO currency (id, name, nominal) " +
+                             "    VALUES (?, ?, ?) " +
+                             "    RETURNING id" +
+                             ") " +
+                             "INSERT INTO value (uuid,   currency_id, value, date) " +
+                             "VALUES (uuid_generate_v4(), (SELECT id FROM inserted_currency), ?, ?)";
 
         int rowsAffected = jdbcTemplate.update(insertQuery,
-                currency.getId(),
-                currency.getName(),
-                currency.getNominal(),
-                currency.getValue().getValue(),
-                currency.getValue().getDate());
+                                               currency.getId(),
+                                               currency.getName(),
+                                               currency.getNominal(),
+                                               currency.getValue().getValue(),
+                                               currency.getValue().getDate());
 
         if (rowsAffected > 0) {
             return currency.getId();
@@ -75,12 +74,12 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
     @Override
     public int saveCurrencies(List<Currency> currencies) {
         String insertQuery = "WITH inserted_currency AS (" +
-                "    INSERT INTO currency (id, name, nominal) " +
-                "    VALUES (?, ?, ?) " +
-                "    RETURNING id" +
-                ") " +
-                "INSERT INTO value (currency_id, value, date) " +
-                "VALUES ((SELECT id FROM inserted_currency), ?, ?)";
+                             "    INSERT INTO currency (id, name, nominal) " +
+                             "    VALUES (?, ?, ?) " +
+                             "    RETURNING id" +
+                             ") " +
+                             "INSERT INTO value (currency_id, value, date) " +
+                             "VALUES ((SELECT id FROM inserted_currency), ?, ?)";
 
         int rowsAffected = jdbcTemplate.batchUpdate(insertQuery, new BatchPreparedStatementSetter() {
             @Override
@@ -109,8 +108,8 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
     }
 
     /**
-     * This method returns a Currency object with the specified ID found in the data store
-     * It executes a SQL query to retrieve currency data by currency ID
+     * This method returns a Currency object with the specified ID found in the data store It executes a SQL query to
+     * retrieve currency data by currency ID
      *
      * @param id the ID of the currency to retrieve
      * @return the Currency object with the specified ID, or null if not found
@@ -118,9 +117,9 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
     @Override
     public Currency getCurrencyById(String id) {
         String selectQuery = "SELECT c.id, c.name, c.nominal, v.value, v.date " +
-                "FROM currency c " +
-                "JOIN value v ON c.id = v.currency_id " +
-                "WHERE v.currency_id = ?";
+                             "FROM currency c " +
+                             "JOIN value v ON c.id = v.currency_id " +
+                             "WHERE v.currency_id = ?";
         try {
             return jdbcTemplate.queryForObject(selectQuery, new CurrencyMapper(), id);
         } catch (EmptyResultDataAccessException ex) {
@@ -130,8 +129,8 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
     }
 
     /**
-     * This method updates the Currency object in the data store
-     * It executes an SQL query to update the value and date of the currency in the value table by its ID
+     * This method updates the Currency object in the data store It executes an SQL query to update the value and date
+     * of the currency in the value table by its ID
      *
      * @param currency the Currency object to update
      * @return the updated Currency object, or throws a RuntimeException if the operation fails
@@ -143,9 +142,9 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
         try {
 
             rowsAffected = jdbcTemplate.update(updateQuery,
-                    currency.getValue().getValue(),
-                    currency.getValue().getDate(),
-                    currency.getId());
+                                               currency.getValue().getValue(),
+                                               currency.getValue().getDate(),
+                                               currency.getId());
         } catch (Exception ex) {
             log.error(ex.getMessage());
             throw new RuntimeException(ex);
@@ -206,12 +205,12 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
     @Override
     public List<Currency> getCurrencyByPeriod(LocalDate startDate, LocalDate endDate, String idFirst, String idSecond) {
         String selectQuery =
-                "SELECT c.id, c.name, c.nominal, v.value, v.date " +
-                        "FROM currency c " +
-                        "JOIN value v ON c.id = v.currency_id " +
-                        "WHERE (id = ? OR id = ?) AND " +
-                        "date >= ? AND " +
-                        "date <= ?";
+            "SELECT c.id, c.name, c.nominal, v.value, v.date " +
+            "FROM currency c " +
+            "JOIN value v ON c.id = v.currency_id " +
+            "WHERE (id = ? OR id = ?) AND " +
+            "date >= ? AND " +
+            "date <= ?";
         List<Currency> currencies = new ArrayList<>();
         try {
             currencies = jdbcTemplate.query(selectQuery, new CurrencyMapper(), idFirst, idSecond, startDate, endDate);
@@ -231,8 +230,8 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
     @Override
     public List<Currency> getAllCurrency(LocalDate date) {
         String selectQuery = "SELECT c.id, c.name, c.nominal, v.value, v.date " +
-                "FROM currency c " +
-                "JOIN value v ON c.id = v.currency_id where v.date = ? AND v.currency_id != 'RUB'";
+                             "FROM currency c " +
+                             "JOIN value v ON c.id = v.currency_id where v.date = ? AND v.currency_id != 'RUB'";
 
         return new ArrayList<>(jdbcTemplate.query(selectQuery, new CurrencyMapper(), date));
     }
@@ -245,7 +244,7 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
     @Override
     public List<String> getAllCurrenciesIds() {
         return new ArrayList<>(jdbcTemplate.query("select id from currency",
-                (rs, rowNum) -> rs.getString("id")));
+                                                  (rs, rowNum) -> rs.getString("id")));
     }
 
     /**
@@ -269,16 +268,17 @@ public class CurrencyRepositoryImpl implements CurrencyRepository, HistoryReposi
      */
     @Override
     public int saveHistory(History history) {
-        String insertQuery = "INSERT INTO history (id, conversion_date, input_currency, input_amount, output_currency, output_amount) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String insertQuery =
+            "INSERT INTO history (id, conversion_date, input_currency, input_amount, output_currency, output_amount) " +
+            "VALUES (?, ?, ?, ?, ?, ?)";
 
         int rowsAffected = jdbcTemplate.update(insertQuery,
-                history.getId(),
-                history.getConversionDate(),
-                history.getInputCurrency(),
-                history.getInputAmount(),
-                history.getOutputCurrency(),
-                history.getOutputAmount());
+                                               history.getId(),
+                                               history.getConversionDate(),
+                                               history.getInputCurrency(),
+                                               history.getInputAmount(),
+                                               history.getOutputCurrency(),
+                                               history.getOutputAmount());
 
         if (rowsAffected > 0) {
             return history.getId();
