@@ -2,6 +2,7 @@ package com.github.hey_world_team.currency_converter.service;
 
 import com.github.hey_world_team.currency_converter.config.PropertiesForFileService;
 import com.github.hey_world_team.currency_converter.repository.CurrencyRepositoryImpl;
+import com.github.hey_world_team.currency_converter.service.processing.FileService;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.InjectMocks;

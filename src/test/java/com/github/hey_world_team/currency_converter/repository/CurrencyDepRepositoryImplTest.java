@@ -1,6 +1,6 @@
 package com.github.hey_world_team.currency_converter.repository;
 
-import com.github.hey_world_team.currency_converter.model.Currency;
+import com.github.hey_world_team.currency_converter.model.CurrencyDep;
 import com.github.hey_world_team.currency_converter.model.History;
 import com.github.hey_world_team.currency_converter.model.Value;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,6 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-@ContextConfiguration(classes = {CurrencyRepositoryImplTest.TestConfiguration.class})
-public class CurrencyRepositoryImplTest {
+@ContextConfiguration(classes = {CurrencyDepRepositoryImplTest.TestConfiguration.class})
+public class CurrencyDepRepositoryImplTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -68,14 +67,14 @@ public class CurrencyRepositoryImplTest {
     @Test
     public void saveCurrency_ShouldReturnId_WhenSavedSuccessfully() {
         // Arrange
-        Currency currency = new Currency();
-        currency.setId("USD");
-        currency.setName("US Dollar");
-        currency.setNominal(1);
-        currency.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
+        CurrencyDep currencyDep = new CurrencyDep();
+        currencyDep.setId("USD");
+        currencyDep.setName("US Dollar");
+        currencyDep.setNominal(1);
+        currencyDep.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
 
         // Act
-        String id = currencyRepository.saveCurrency(currency);
+        String id = currencyRepository.saveCurrency(currencyDep);
 
         // Assert
         assertNotNull(id);
@@ -85,48 +84,48 @@ public class CurrencyRepositoryImplTest {
     @Test
     public void updateCurrency_ShouldReturnUpdatedCurrency_WhenUpdateSuccessful() {
         // Arrange
-        Currency currency = new Currency();
-        currency.setId("USD");
-        currency.setName("US");
-        currency.setNominal(1);
-        currency.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
+        CurrencyDep currencyDep = new CurrencyDep();
+        currencyDep.setId("USD");
+        currencyDep.setName("US");
+        currencyDep.setNominal(1);
+        currencyDep.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
 
-        Currency currencyForUpdate = new Currency();
-        currencyForUpdate.setId("USD");
-        currencyForUpdate.setName("US Dollar");
-        currencyForUpdate.setNominal(10);
-        currencyForUpdate.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
+        CurrencyDep currencyDepForUpdate = new CurrencyDep();
+        currencyDepForUpdate.setId("USD");
+        currencyDepForUpdate.setName("US Dollar");
+        currencyDepForUpdate.setNominal(10);
+        currencyDepForUpdate.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
 
         // Act
-        String id = currencyRepository.saveCurrency(currency);
-        Currency updatedCurrency = currencyRepository.updateCurrency(currencyForUpdate);
+        String id = currencyRepository.saveCurrency(currencyDep);
+        CurrencyDep updatedCurrencyDep = currencyRepository.updateCurrency(currencyDepForUpdate);
 
         // Assert
         assertNotNull(id);
         assertEquals("USD", id);
-        assertNotNull(updatedCurrency);
-        assertEquals(currencyForUpdate.getId(), updatedCurrency.getId());
-        assertEquals(currencyForUpdate.getNominal(), updatedCurrency.getNominal());
-        assertEquals(currencyForUpdate.getValue(), updatedCurrency.getValue());
-        assertEquals(currencyForUpdate.getValue().getDate(), updatedCurrency.getValue().getDate());
+        assertNotNull(updatedCurrencyDep);
+        assertEquals(currencyDepForUpdate.getId(), updatedCurrencyDep.getId());
+        assertEquals(currencyDepForUpdate.getNominal(), updatedCurrencyDep.getNominal());
+        assertEquals(currencyDepForUpdate.getValue(), updatedCurrencyDep.getValue());
+        assertEquals(currencyDepForUpdate.getValue().getDate(), updatedCurrencyDep.getValue().getDate());
     }
 
     @Test
     public void saveCurrencies_ShouldReturnRowCount_WhenSavedSuccessfully() {
         // Arrange
-        Currency currency1 = new Currency();
-        currency1.setId("USD");
-        currency1.setName("US Dollar");
-        currency1.setNominal(1);
-        currency1.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
+        CurrencyDep currencyDep1 = new CurrencyDep();
+        currencyDep1.setId("USD");
+        currencyDep1.setName("US Dollar");
+        currencyDep1.setNominal(1);
+        currencyDep1.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
 
-        Currency currency2 = new Currency();
-        currency2.setId("EUR");
-        currency2.setName("Euro");
-        currency2.setNominal(1);
-        currency2.setValue(new Value(BigDecimal.valueOf(0.9), LocalDate.now()));
+        CurrencyDep currencyDep2 = new CurrencyDep();
+        currencyDep2.setId("EUR");
+        currencyDep2.setName("Euro");
+        currencyDep2.setNominal(1);
+        currencyDep2.setValue(new Value(BigDecimal.valueOf(0.9), LocalDate.now()));
 
-        List<Currency> currencies = Arrays.asList(currency1, currency2);
+        List<CurrencyDep> currencies = Arrays.asList(currencyDep1, currencyDep2);
 
         // Act
         int rowCount = currencyRepository.saveCurrencies(currencies);
@@ -138,11 +137,11 @@ public class CurrencyRepositoryImplTest {
     @Test
     public void saveCurrency_ShouldThrowException_WhenSaveFails() {
         // Arrange
-        Currency currency = new Currency();
-        currency.setId("USD");
-        currency.setName("US Dollar");
-        currency.setNominal(1);
-        currency.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
+        CurrencyDep currencyDep = new CurrencyDep();
+        currencyDep.setId("USD");
+        currencyDep.setName("US Dollar");
+        currencyDep.setNominal(1);
+        currencyDep.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
 
         // Create a mock JdbcTemplate that always returns 0 rows affected
         JdbcTemplate mockJdbcTemplate = mock(JdbcTemplate.class);
@@ -151,7 +150,7 @@ public class CurrencyRepositoryImplTest {
         CurrencyRepositoryImpl currencyRepository = new CurrencyRepositoryImpl(mockJdbcTemplate);
         // Act and Assert
         RuntimeException exception = org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class,
-                () -> currencyRepository.saveCurrency(currency)
+                () -> currencyRepository.saveCurrency(currencyDep)
         );
         assertEquals("Failed to save currency with id: USD", exception.getMessage());
     }
@@ -161,21 +160,21 @@ public class CurrencyRepositoryImplTest {
         // Arrange
         String id = "USD";
 
-        Currency currency = new Currency();
-        currency.setId(id);
-        currency.setName("US Dollar");
-        currency.setNominal(1);
-        currency.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
+        CurrencyDep currencyDep = new CurrencyDep();
+        currencyDep.setId(id);
+        currencyDep.setName("US Dollar");
+        currencyDep.setNominal(1);
+        currencyDep.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
 
         // Act
-        String savedId = currencyRepository.saveCurrency(currency);
-        Currency currencyFromDB = currencyRepository.getCurrencyById(id);
+        String savedId = currencyRepository.saveCurrency(currencyDep);
+        CurrencyDep currencyDepFromDB = currencyRepository.getCurrencyById(id);
 
         // Assert
         assertNotNull(savedId);
         assertEquals(id, savedId);
-        assertNotNull(currencyFromDB);
-        assertEquals(id, currencyFromDB.getId());
+        assertNotNull(currencyDepFromDB);
+        assertEquals(id, currencyDepFromDB.getId());
     }
 
     @Test
@@ -184,26 +183,26 @@ public class CurrencyRepositoryImplTest {
         String id = "INVALID_ID";
 
         // Act
-        Currency currency = currencyRepository.getCurrencyById(id);
+        CurrencyDep currencyDep = currencyRepository.getCurrencyById(id);
 
         // Assert
-        assertNull(currency);
+        assertNull(currencyDep);
     }
 
     @Test
     public void updateCurrency_ShouldThrowException_WhenUpdateFails() {
         // Arrange
-        Currency currency = new Currency();
-        currency.setId("INVALID_ID");
-        currency.setName("Invalid Currency");
-        currency.setNominal(1);
-        currency.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
+        CurrencyDep currencyDep = new CurrencyDep();
+        currencyDep.setId("INVALID_ID");
+        currencyDep.setName("Invalid Currency");
+        currencyDep.setNominal(1);
+        currencyDep.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
 
         // Act and Assert
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> currencyRepository.updateCurrency(currency)
+                () -> currencyRepository.updateCurrency(currencyDep)
         );
-        assertEquals("Failed to update currency with id: " + currency.getId(), exception.getMessage());
+        assertEquals("Failed to update currency with id: " + currencyDep.getId(), exception.getMessage());
     }
 
     @Test
@@ -211,21 +210,21 @@ public class CurrencyRepositoryImplTest {
         // Arrange
         LocalDate date = LocalDate.now();
 
-        Currency currency1 = new Currency();
-        currency1.setId("USD");
-        currency1.setName("US Dollar");
-        currency1.setNominal(1);
-        currency1.setValue(new Value(BigDecimal.valueOf(1.0), date));
+        CurrencyDep currencyDep1 = new CurrencyDep();
+        currencyDep1.setId("USD");
+        currencyDep1.setName("US Dollar");
+        currencyDep1.setNominal(1);
+        currencyDep1.setValue(new Value(BigDecimal.valueOf(1.0), date));
 
-        Currency currency2 = new Currency();
-        currency2.setId("EUR");
-        currency2.setName("Euro");
-        currency2.setNominal(1);
-        currency2.setValue(new Value(BigDecimal.valueOf(0.9), date));
+        CurrencyDep currencyDep2 = new CurrencyDep();
+        currencyDep2.setId("EUR");
+        currencyDep2.setName("Euro");
+        currencyDep2.setNominal(1);
+        currencyDep2.setValue(new Value(BigDecimal.valueOf(0.9), date));
 
         // Act
-        int affectedRows = currencyRepository.saveCurrencies(List.of(currency1, currency2));
-        List<Currency> currencies = currencyRepository.getAllCurrency(date);
+        int affectedRows = currencyRepository.saveCurrencies(List.of(currencyDep1, currencyDep2));
+        List<CurrencyDep> currencies = currencyRepository.getAllCurrency(date);
 
         // Assert
         assertEquals(2, affectedRows);
@@ -239,7 +238,7 @@ public class CurrencyRepositoryImplTest {
         LocalDate date = LocalDate.of(2022, 1, 1); // An arbitrary date that does not exist in the database
 
         // Act
-        List<Currency> currencies = currencyRepository.getAllCurrency(date);
+        List<CurrencyDep> currencies = currencyRepository.getAllCurrency(date);
 
         // Assert
         assertNotNull(currencies);
@@ -249,19 +248,19 @@ public class CurrencyRepositoryImplTest {
     @Test
     public void getAllCurrenciesIds_ShouldReturnListOfIds() {
         // Arrange
-        Currency currency1 = new Currency();
-        currency1.setId("USD");
-        currency1.setName("US Dollar");
-        currency1.setNominal(1);
-        currency1.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
+        CurrencyDep currencyDep1 = new CurrencyDep();
+        currencyDep1.setId("USD");
+        currencyDep1.setName("US Dollar");
+        currencyDep1.setNominal(1);
+        currencyDep1.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
 
-        Currency currency2 = new Currency();
-        currency2.setId("EUR");
-        currency2.setName("Euro");
-        currency2.setNominal(1);
-        currency2.setValue(new Value(BigDecimal.valueOf(0.8), LocalDate.now()));
+        CurrencyDep currencyDep2 = new CurrencyDep();
+        currencyDep2.setId("EUR");
+        currencyDep2.setName("Euro");
+        currencyDep2.setNominal(1);
+        currencyDep2.setValue(new Value(BigDecimal.valueOf(0.8), LocalDate.now()));
 
-        List<Currency> currencies = Arrays.asList(currency1, currency2);
+        List<CurrencyDep> currencies = Arrays.asList(currencyDep1, currencyDep2);
 
         // Act
         int rowsAffected = currencyRepository.saveCurrencies(currencies);
@@ -285,19 +284,19 @@ public class CurrencyRepositoryImplTest {
     @Test
     public void saveCurrencies_ShouldReturnNumberOfRowsAffected_WhenSavedSuccessfully() {
         // Arrange
-        Currency currency1 = new Currency();
-        currency1.setId("USD");
-        currency1.setName("US Dollar");
-        currency1.setNominal(1);
-        currency1.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
+        CurrencyDep currencyDep1 = new CurrencyDep();
+        currencyDep1.setId("USD");
+        currencyDep1.setName("US Dollar");
+        currencyDep1.setNominal(1);
+        currencyDep1.setValue(new Value(BigDecimal.valueOf(1.0), LocalDate.now()));
 
-        Currency currency2 = new Currency();
-        currency2.setId("EUR");
-        currency2.setName("Euro");
-        currency2.setNominal(1);
-        currency2.setValue(new Value(BigDecimal.valueOf(0.8), LocalDate.now()));
+        CurrencyDep currencyDep2 = new CurrencyDep();
+        currencyDep2.setId("EUR");
+        currencyDep2.setName("Euro");
+        currencyDep2.setNominal(1);
+        currencyDep2.setValue(new Value(BigDecimal.valueOf(0.8), LocalDate.now()));
 
-        List<Currency> currencies = Arrays.asList(currency1, currency2);
+        List<CurrencyDep> currencies = Arrays.asList(currencyDep1, currencyDep2);
 
         // Act
         int rowsAffected = currencyRepository.saveCurrencies(currencies);
@@ -309,15 +308,15 @@ public class CurrencyRepositoryImplTest {
     @Test
     public void updateCurrencies_ShouldReturnNumberOfRowsAffected_WhenUpdateSuccessful() {
         // Arrange
-        Currency currency1 = new Currency();
-        currency1.setId("USD");
-        currency1.setValue(new Value(BigDecimal.valueOf(1.2), LocalDate.now()));
+        CurrencyDep currencyDep1 = new CurrencyDep();
+        currencyDep1.setId("USD");
+        currencyDep1.setValue(new Value(BigDecimal.valueOf(1.2), LocalDate.now()));
 
-        Currency currency2 = new Currency();
-        currency2.setId("EUR");
-        currency2.setValue(new Value(BigDecimal.valueOf(0.9), LocalDate.now()));
+        CurrencyDep currencyDep2 = new CurrencyDep();
+        currencyDep2.setId("EUR");
+        currencyDep2.setValue(new Value(BigDecimal.valueOf(0.9), LocalDate.now()));
 
-        List<Currency> currencies = Arrays.asList(currency1, currency2);
+        List<CurrencyDep> currencies = Arrays.asList(currencyDep1, currencyDep2);
 
         // Act
         int rowsAffected = currencyRepository.updateCurrencies(currencies);
@@ -332,25 +331,25 @@ public class CurrencyRepositoryImplTest {
         LocalDate startDate = LocalDate.of(2023, 1, 1);
         LocalDate endDate = LocalDate.of(2023, 6, 1);
 
-        Currency currency1 = new Currency();
-        currency1.setId("USD");
-        currency1.setName("US Dollar");
-        currency1.setNominal(1);
-        currency1.setValue(new Value(BigDecimal.valueOf(1.0), startDate));
+        CurrencyDep currencyDep1 = new CurrencyDep();
+        currencyDep1.setId("USD");
+        currencyDep1.setName("US Dollar");
+        currencyDep1.setNominal(1);
+        currencyDep1.setValue(new Value(BigDecimal.valueOf(1.0), startDate));
 
-        Currency currency2 = new Currency();
-        currency2.setId("EUR");
-        currency2.setName("Euro");
-        currency2.setNominal(1);
-        currency2.setValue(new Value(BigDecimal.valueOf(0.8), endDate));
+        CurrencyDep currencyDep2 = new CurrencyDep();
+        currencyDep2.setId("EUR");
+        currencyDep2.setName("Euro");
+        currencyDep2.setNominal(1);
+        currencyDep2.setValue(new Value(BigDecimal.valueOf(0.8), endDate));
 
 
         String idFirst = "USD";
         String idSecond = "EUR";
 
         // Act
-        int affectedRows = currencyRepository.saveCurrencies(List.of(currency1, currency2));
-        List<Currency> values = currencyRepository.getCurrencyByPeriod(startDate, endDate, idFirst, idSecond);
+        int affectedRows = currencyRepository.saveCurrencies(List.of(currencyDep1, currencyDep2));
+        List<CurrencyDep> values = currencyRepository.getCurrencyByPeriod(startDate, endDate, idFirst, idSecond);
 
         // Assert
         assertEquals(2, affectedRows);
@@ -367,7 +366,7 @@ public class CurrencyRepositoryImplTest {
         String idSecond = "INVALID_ID";
 
         // Act
-        List<Currency> values = currencyRepository.getCurrencyByPeriod(startDate, endDate, idFirst, idSecond);
+        List<CurrencyDep> values = currencyRepository.getCurrencyByPeriod(startDate, endDate, idFirst, idSecond);
 
         // Assert
         assertNotNull(values);

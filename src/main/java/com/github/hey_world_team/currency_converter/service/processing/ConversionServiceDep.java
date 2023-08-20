@@ -1,6 +1,7 @@
-package com.github.hey_world_team.currency_converter.service;
+package com.github.hey_world_team.currency_converter.service.processing;
 
 import com.github.hey_world_team.currency_converter.model.BestConversion;
+import com.github.hey_world_team.currency_converter.service.currency.CurrencyServiceDep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +10,8 @@ import java.math.RoundingMode;
 import java.util.*;
 
 @Service
-public class ConversionService {
+@Deprecated
+public class ConversionServiceDep {
 
     //TODO replace these maps with real repository
     //temporary solution for storing data about cryptocurrencies
@@ -18,7 +20,7 @@ public class ConversionService {
     private final Map<String, BigDecimal> cryptoRatesToEur;
 
     @Autowired
-    public ConversionService(CurrencyService service) {
+    public ConversionServiceDep(CurrencyServiceDep service) {
         cryptoRatesToUsd = new LinkedHashMap<>();
         cryptoRatesToUsd.put("USDT", new BigDecimal("1.01")); // USDT to USD exchange rate
         cryptoRatesToUsd.put("ETH", new BigDecimal("1880")); // ETH to USD exchange rate

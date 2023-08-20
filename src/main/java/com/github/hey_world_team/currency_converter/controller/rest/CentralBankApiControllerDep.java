@@ -1,12 +1,12 @@
 package com.github.hey_world_team.currency_converter.controller.rest;
 
 import com.github.hey_world_team.currency_converter.model.BestConversion;
-import com.github.hey_world_team.currency_converter.model.Currency;
+import com.github.hey_world_team.currency_converter.model.CurrencyDep;
 import com.github.hey_world_team.currency_converter.model.History;
-import com.github.hey_world_team.currency_converter.service.ConversionService;
-import com.github.hey_world_team.currency_converter.service.CurrencyService;
-import com.github.hey_world_team.currency_converter.service.FileService;
-import com.github.hey_world_team.currency_converter.service.HistoryService;
+import com.github.hey_world_team.currency_converter.service.processing.ConversionServiceDep;
+import com.github.hey_world_team.currency_converter.service.currency.CurrencyServiceDep;
+import com.github.hey_world_team.currency_converter.service.processing.FileService;
+import com.github.hey_world_team.currency_converter.service.history.HistoryService;
 import com.github.hey_world_team.currency_converter.service.status.DataBasePrepare;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,27 +28,28 @@ import java.util.List;
  * CentralBankApiController is controller REST API for interaction with currencies and history of conversion
  */
 @RestController
-@RequestMapping("/api/currency")
-public class CentralBankApiController {
+@RequestMapping("/api/ver1/currency")
+@Deprecated
+public class CentralBankApiControllerDep {
 
-    private static final Logger log = LoggerFactory.getLogger(CentralBankApiController.class);
-    private final CurrencyService currencyService;
+    private static final Logger log = LoggerFactory.getLogger(CentralBankApiControllerDep.class);
+    private final CurrencyServiceDep currencyServiceDep;
     private final FileService fileService;
     private final HistoryService historyService;
-    private final ConversionService conversionService;
+    private final ConversionServiceDep conversionServiceDep;
 
     //TODO for future api with current date
     //private static final String DATE_API = "date_req";
 
     @Autowired
-    public CentralBankApiController(CurrencyService currencyService,
-                                    FileService fileService,
-                                    HistoryService historyService,
-                                    ConversionService conversionService) {
+    public CentralBankApiControllerDep(CurrencyServiceDep currencyServiceDep,
+                                       FileService fileService,
+                                       HistoryService historyService,
+                                       ConversionServiceDep conversionServiceDep) {
         this.fileService = fileService;
-        this.currencyService = currencyService;
+        this.currencyServiceDep = currencyServiceDep;
         this.historyService = historyService;
-        this.conversionService = conversionService;
+        this.conversionServiceDep = conversionServiceDep;
     }
 
     /**
@@ -56,7 +57,7 @@ public class CentralBankApiController {
      */
     @PostConstruct
     public void onStartup() {
-        if (currencyService.dbIsEmpty()) {
+        if (currencyServiceDep.dbIsEmpty()) {
             fileService.prepareDataBase(DataBasePrepare.CREATE, null);
         }
     }
@@ -96,12 +97,12 @@ public class CentralBankApiController {
         @RequestParam("costBTC") BigDecimal costBTC,
         @RequestParam("targetCurrency") String targetCurrency) {
 
-        BestConversion result = conversionService.convertCurrency(amount,
-                                                                  sourceCurrency,
-                                                                  costUSDT,
-                                                                  costETH,
-                                                                  costBTC,
-                                                                  targetCurrency);
+        BestConversion result = conversionServiceDep.convertCurrency(amount,
+                                                                     sourceCurrency,
+                                                                     costUSDT,
+                                                                     costETH,
+                                                                     costBTC,
+                                                                     targetCurrency);
 
         return (result != null)
                ? new ResponseEntity<>(result, HttpStatus.OK)
@@ -117,7 +118,7 @@ public class CentralBankApiController {
     @GetMapping(value = "/getAllIds")
     public ResponseEntity<List<String>> getAllCurrenciesId(RequestEntity<?> entity) {
         log.info("access to path {}", entity.getUrl());
-        List<String> ids = currencyService.getAllCurrenciesId();
+        List<String> ids = currencyServiceDep.getAllCurrenciesId();
         return (ids != null && !ids.isEmpty())
                ? new ResponseEntity<>(ids, HttpStatus.OK)
                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -131,11 +132,11 @@ public class CentralBankApiController {
      * @return ResponseEntity with the collection of currencies for the specified  date
      */
     @GetMapping(value = "/getAllCurrenciesByDate")
-    public ResponseEntity<Collection<Currency>> getAllCurrenciesByDate(
+    public ResponseEntity<Collection<CurrencyDep>> getAllCurrenciesByDate(
         RequestEntity<?> entity,
         @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         log.info("access to path {}", entity.getUrl());
-        Collection<Currency> currencies = currencyService.getAllCurrency(date);
+        Collection<CurrencyDep> currencies = currencyServiceDep.getAllCurrency(date);
         return (currencies != null && !currencies.isEmpty())
                ? new ResponseEntity<>(currencies, HttpStatus.OK)
                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -148,12 +149,12 @@ public class CentralBankApiController {
      * @return ResponseEntity with the currency information
      */
     @GetMapping(value = "/getCurrencyCost/{currencyId}")
-    public ResponseEntity<Currency> getCurrencyCostById(
+    public ResponseEntity<CurrencyDep> getCurrencyCostById(
         @PathVariable(value = "currencyId") String currencyId) {
         log.info("access to API get currency cost by id: {}", currencyId);
-        Currency currencyDto = currencyService.getCurrencyCost(currencyId);
-        return (currencyDto != null)
-               ? new ResponseEntity<>(currencyDto, HttpStatus.OK)
+        CurrencyDep currencyDepDto = currencyServiceDep.getCurrencyCost(currencyId);
+        return (currencyDepDto != null)
+               ? new ResponseEntity<>(currencyDepDto, HttpStatus.OK)
                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -167,14 +168,14 @@ public class CentralBankApiController {
      * @return ResponseEntity with the list of currencies
      */
     @GetMapping("/byPeriod")
-    public ResponseEntity<List<Currency>> getCurrencyByPeriod(
+    public ResponseEntity<List<CurrencyDep>> getCurrencyByPeriod(
         @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
         @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
         @RequestParam("currencyIdFirst") String idFirst,
         @RequestParam("currencyIdSecond") String idSecond) {
-        List<Currency> currencyData = currencyService.getCurrencyByPeriod(startDate, endDate, idFirst, idSecond);
-        return (!currencyData.isEmpty())
-               ? new ResponseEntity<>(currencyData, HttpStatus.OK)
+        List<CurrencyDep> currencyDepData = currencyServiceDep.getCurrencyByPeriod(startDate, endDate, idFirst, idSecond);
+        return (!currencyDepData.isEmpty())
+               ? new ResponseEntity<>(currencyDepData, HttpStatus.OK)
                : new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

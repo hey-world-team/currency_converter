@@ -1,6 +1,6 @@
-package com.github.hey_world_team.currency_converter.service;
+package com.github.hey_world_team.currency_converter.service.currency;
 
-import com.github.hey_world_team.currency_converter.model.Currency;
+import com.github.hey_world_team.currency_converter.model.CurrencyDep;
 import com.github.hey_world_team.currency_converter.repository.CurrencyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +16,14 @@ import java.util.stream.Collectors;
  * CurrencyService handles requests related to currency
  */
 @Service
-public class CurrencyService {
+@Deprecated
+public class CurrencyServiceDep {
 
-    private static final Logger log = LoggerFactory.getLogger(CurrencyService.class);
+    private static final Logger log = LoggerFactory.getLogger(CurrencyServiceDep.class);
     private final CurrencyRepository repository;
 
     @Autowired
-    public CurrencyService(CurrencyRepository currencyDataRepository) {
+    public CurrencyServiceDep(CurrencyRepository currencyDataRepository) {
         this.repository = currencyDataRepository;
     }
 
@@ -32,7 +33,7 @@ public class CurrencyService {
      * @param currencyId identifier of the Currency
      * @return Currency object with its cost
      */
-    public Currency getCurrencyCost(String currencyId) {
+    public CurrencyDep getCurrencyCost(String currencyId) {
         log.info("getting currency cost by currency id: {}", currencyId);
         return repository.getCurrencyById(currencyId);
     }
@@ -53,15 +54,15 @@ public class CurrencyService {
      * @param date the date for which to retrieve the currencies
      * @return a collection of Currency objects
      */
-    public Collection<Currency> getAllCurrency(LocalDate date) {
+    public Collection<CurrencyDep> getAllCurrency(LocalDate date) {
         return repository.getAllCurrency(date)
                          .stream()
-                         .map(currency -> Currency.builder()
-                                                  .id(currency.getId())
-                                                  .value(currency.getValue())
-                                                  .name(currency.getName())
-                                                  .nominal(currency.getNominal())
-                                                  .build())
+                         .map(currency -> CurrencyDep.builder()
+                                                     .id(currency.getId())
+                                                     .value(currency.getValue())
+                                                     .name(currency.getName())
+                                                     .nominal(currency.getNominal())
+                                                     .build())
                          .collect(Collectors.toList());
     }
 
@@ -83,7 +84,7 @@ public class CurrencyService {
      * @param idSecond  the identifier of the second currency
      * @return a list of Currency objects
      */
-    public List<Currency> getCurrencyByPeriod(LocalDate startDate, LocalDate endDate, String idFirst, String idSecond) {
+    public List<CurrencyDep> getCurrencyByPeriod(LocalDate startDate, LocalDate endDate, String idFirst, String idSecond) {
         return repository.getCurrencyByPeriod(startDate, endDate, idFirst, idSecond);
     }
 }

@@ -1,4 +1,4 @@
-package com.github.hey_world_team.currency_converter.service;
+package com.github.hey_world_team.currency_converter.service.history;
 
 
 import com.github.hey_world_team.currency_converter.model.History;

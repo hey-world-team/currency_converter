@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
+@Deprecated
 public class History {
 
     private int id;
