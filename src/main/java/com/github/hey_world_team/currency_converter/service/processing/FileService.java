@@ -1,7 +1,7 @@
-package com.github.hey_world_team.currency_converter.service;
+package com.github.hey_world_team.currency_converter.service.processing;
 
 import com.github.hey_world_team.currency_converter.config.PropertiesForFileService;
-import com.github.hey_world_team.currency_converter.model.Currency;
+import com.github.hey_world_team.currency_converter.model.CurrencyDep;
 import com.github.hey_world_team.currency_converter.model.Value;
 import com.github.hey_world_team.currency_converter.repository.CurrencyRepository;
 import com.github.hey_world_team.currency_converter.service.status.DataBasePrepare;
@@ -40,7 +40,7 @@ public class FileService {
     private final String link;
     private final PropertiesForFileService propertiesForFileService;
     private final CurrencyRepository currencyRepository;
-    private final List<Currency> currencies;
+    private final List<CurrencyDep> currencies;
 
     @Autowired
     public FileService(PropertiesForFileService propertiesForFileService,
@@ -108,7 +108,7 @@ public class FileService {
         int count = 0;
         if (status.equals(DataBasePrepare.CREATE)) {
             log.info("data base is empty need to create new records");
-            this.currencies.add(new Currency("RUB", "Российский рубль", 1, new Value(null, LocalDate.now())));
+            this.currencies.add(new CurrencyDep("RUB", "Российский рубль", 1, new Value(null, LocalDate.now())));
             count = currencyRepository.saveCurrencies(currencies);
         } else if (status.equals(DataBasePrepare.UPDATE)) {
             log.info("data base is not empty need to update values");
@@ -177,8 +177,8 @@ public class FileService {
                                                                       .replace(',', '.')));
             Integer nominal = Integer.valueOf(e.getElementsByTag("Nominal").text());
             Value currencyValue = new Value(value, date);
-            Currency currency = new Currency(id, name, nominal, currencyValue);
-            this.currencies.add(currency);
+            CurrencyDep currencyDep = new CurrencyDep(id, name, nominal, currencyValue);
+            this.currencies.add(currencyDep);
         }
     }
 }

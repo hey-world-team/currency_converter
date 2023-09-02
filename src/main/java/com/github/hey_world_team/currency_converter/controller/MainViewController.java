@@ -1,6 +1,6 @@
 package com.github.hey_world_team.currency_converter.controller;
 
-import com.github.hey_world_team.currency_converter.service.CurrencyService;
+import com.github.hey_world_team.currency_converter.service.currency.CurrencyServiceDep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +20,11 @@ public class MainViewController {
 
     private static final Logger log = LoggerFactory.getLogger(MainViewController.class);
     final private DateTimeFormatter format = DateTimeFormatter.ofPattern("d.MM.yyyy");
-    private final CurrencyService currencyService;
+    private final CurrencyServiceDep currencyServiceDep;
 
     @Autowired
-    public MainViewController(CurrencyService currencyService) {
-        this.currencyService = currencyService;
+    public MainViewController(CurrencyServiceDep currencyServiceDep) {
+        this.currencyServiceDep = currencyServiceDep;
     }
 
     /**
@@ -39,7 +39,7 @@ public class MainViewController {
         ModelAndView modelAndView = new ModelAndView("index");
         String date = LocalDate.now().format(format);
         modelAndView.addObject("date", date);
-        modelAndView.addObject("currentCourse", currencyService.getAllCurrency(LocalDate.now()));
+        modelAndView.addObject("currentCourse", currencyServiceDep.getAllCurrency(LocalDate.now()));
         return modelAndView;
     }
 

@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode
 @ToString
 @Builder
+@Deprecated
 public class Value {
 
     private BigDecimal value;

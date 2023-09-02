@@ -13,7 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 @ToString
 @Slf4j
 @Builder
-public class Currency {
+@Deprecated
+public class CurrencyDep {
 
     private String id;
     private String name;

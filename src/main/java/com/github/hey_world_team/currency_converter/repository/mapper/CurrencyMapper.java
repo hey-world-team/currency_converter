@@ -1,6 +1,6 @@
 package com.github.hey_world_team.currency_converter.repository.mapper;
 
-import com.github.hey_world_team.currency_converter.model.Currency;
+import com.github.hey_world_team.currency_converter.model.CurrencyDep;
 import com.github.hey_world_team.currency_converter.model.Value;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import java.sql.SQLException;
  * object
  */
 @Component
-public class CurrencyMapper implements RowMapper<Currency> {
+public class CurrencyMapper implements RowMapper<CurrencyDep> {
 
     /**
      * This method creates a new Currency object, using the values from the current row of the ResultSet
@@ -24,8 +24,8 @@ public class CurrencyMapper implements RowMapper<Currency> {
      * @throws SQLException if a SQLException is encountered while processing the ResultSet
      */
     @Override
-    public Currency mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return new Currency(
+    public CurrencyDep mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return new CurrencyDep(
             rs.getString("id"),
             rs.getString("name"),
             rs.getInt("nominal"),

@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
+@Deprecated
 public class BestConversion {
 
     private BigDecimal convertedAmount;

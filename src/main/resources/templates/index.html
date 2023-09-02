@@ -66,8 +66,8 @@
                         <select id="checkbox1" class="form-control"
                                 onchange="selectChangedAndConvertOneElement(this.value)">
                             <option selected>Choose...</option>
-                            <option th:each="currencyDto: ${currentCourse}" th:value="${currencyDto.id}"
-                                    th:text="${currencyDto.name}">
+                            <option th:each="currencyDepDto: ${currentCourse}" th:value="${currencyDepDto.id}"
+                                    th:text="${currencyDepDto.name}">
                             </option>
                         </select>
                     </div>
@@ -76,8 +76,8 @@
                         <select id="checkbox2" class="form-control"
                                 onchange="selectChangedAndConvertTwoElement(this.value)">
                             <option selected>Choose...</option>
-                            <option th:each="currencyDto: ${currentCourse}" th:value="${currencyDto.id}"
-                                    th:text="${currencyDto.name}">
+                            <option th:each="currencyDepDto: ${currentCourse}" th:value="${currencyDepDto.id}"
+                                    th:text="${currencyDepDto.name}">
                             </option>
                         </select>
                     </div>
@@ -89,7 +89,7 @@
                                min="1" step="any"
                                class="form-control"
                                id="initialValueCurrency"
-                               placeholder="initial value of currencyDto"
+                               placeholder="initial value of currencyDepDto"
                                oninput="inputChangedAndConvertOneElement(this.value)">
                     </div>
                     <div class="form-group col-6">
@@ -98,7 +98,7 @@
                                step="any"
                                class="form-control"
                                id="targetValueCurrency"
-                               placeholder="target value of currencyDto"
+                               placeholder="target value of currencyDepDto"
                                oninput="inputChangedAndConvertTwoElement(this.value)">
                     </div>
                 </div>

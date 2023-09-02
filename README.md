@@ -4,7 +4,7 @@ Java            17+
 Maven           3.5+  
 
 Description:   
-Just a currency converter calculator  
+Just a currencyDep converter calculator  
     
 How to run:
 1 - git clone https://github.com/hey-world-team/currencyConverter.git  

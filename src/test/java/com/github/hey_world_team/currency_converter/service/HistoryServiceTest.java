@@ -4,6 +4,7 @@ import com.github.hey_world_team.currency_converter.model.History;
 
 
 import com.github.hey_world_team.currency_converter.repository.HistoryRepository;
+import com.github.hey_world_team.currency_converter.service.history.HistoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
